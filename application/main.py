@@ -2,7 +2,11 @@ import datetime
 import io
 
 import nltk
+import re
 from bs4 import BeautifulSoup
+
+
+ALLOWED_CHARS = list()
 
 
 def get_file(filename):
@@ -36,6 +40,26 @@ def get_text_from_html_str(string):
 def process_html_str(html_str):
     # TODO: Procesamiento de la hilera leída del archivo html
     return html_str
+
+
+def define_unicode_allowed_chars():
+    for char_value in range(ord('0'), ord('9') + 1):
+        ALLOWED_CHARS.append(chr(char_value).encode('utf-8'))
+
+    for char_value in range(ord('a'), ord('z') + 1):
+        ALLOWED_CHARS.append(chr(char_value).encode('utf-8'))
+
+    additional_chars = ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ']
+
+    for char in additional_chars:
+        ALLOWED_CHARS.append(char.encode('utf-8'))
+
+
+def include_term(string):
+    for char in string:
+        if char.encode('utf-8') not in ALLOWED_CHARS:
+            return False
+    return True
 
 
 def process_urls_files(main_dir, urls_file_name, html_files_dir):
@@ -90,6 +114,8 @@ def process_urls_files(main_dir, urls_file_name, html_files_dir):
 
 
 def test():
+    define_unicode_allowed_chars()
+
     url_path = '../RI_Coleccion/Coleccion/covid1.html'
     f = open(url_path)
 
@@ -102,9 +128,28 @@ def test():
 
     print('Texto: {}'.format(s_texto))
 
+    # Remueve los caracteres de puntuación
+    # Por el momento esto incluye eliminar todos los guiones
+    s_texto = ' '.join(re.findall(r'\w+', s_texto, flags=re.UNICODE))
     tokens = nltk.word_tokenize(s_texto)
 
     print('Tokens: {}'.format(tokens))
+
+    print()
+
+    terms = list()
+    print('EXCLUDED:')
+    for token in tokens:
+        if include_term(token.lower()):
+            terms.append(token.lower())
+        else:
+            # Se imprimen primero los términos que se excluyen
+            print(token)
+
+    print()
+    print('INCLUDED:')
+    # Se imprime la lista de términos que se incluyen
+    print(terms)
 
 
 def run():
@@ -115,10 +160,10 @@ def run():
 
 
 def main():
-    run()
+    # run()
 
     # Para probar funciones de procesamiento de texto
-    # test()
+    test()
 
     # Para medir tiempo de ejecución
     # begin_time = datetime.datetime.now()
