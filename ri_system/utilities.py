@@ -12,20 +12,6 @@ class Utilities:
     # \p{P} or \p{Punctuation}: any kind of punctuation character.
     # \p{Pd} or \p{Dash_Punctuation}: any kind of hyphen or dash.
 
-    all_chars = None
-    format_chars = None
-    punctuation_chars = None
-    regex_format_chars = None
-    regex_punctuation_chars = None
-    regex_dash_chars = None
-
-    # Implementación 1 para puntuación y especiales
-    # all_chars = [chr(i) for i in range(sys.maxunicode)]
-    # format_chars = ''.join(c for c in all_chars if regex.match(r'\p{Format}', c))
-    # punctuation_chars = ''.join(c for c in all_chars if (regex.match(r'\p{Symbol}', c)) or
-    #                             (regex.match(r'\p{Punctuation}', c) and not regex.match(r'\p{Dash_Punctuation}', c)))
-
-    # Implementación 2 para puntuación y especiales
     regex_format_chars = regex.compile('\p{Format}')
     # Se debe hacer de esta manera porque [\p{Punctuation}--\p{Dash_Punctuation}] no funciona
     regex_punctuation_chars = regex.compile(
@@ -69,10 +55,7 @@ class Utilities:
 
     @staticmethod
     def handle_unicode_format_chars(original_str, replacement_char=''):
-
-        # return Utilities.impl_1_especiales(original_str, replacement_char)
-
-        return Utilities.impl_2_especiales(original_str, replacement_char)
+        return regex.sub(Utilities.regex_format_chars, replacement_char, original_str)
 
     @staticmethod
     def remove_punctuation_chars(original_str):
@@ -84,10 +67,7 @@ class Utilities:
 
     @staticmethod
     def handle_punctuation_chars(original_str, replacement_char=''):
-
-        # return Utilities.impl_1_puntuacion(original_str, replacement_char)
-
-        return Utilities.impl_2_puntuacion(original_str, replacement_char)
+        return regex.sub(Utilities.regex_punctuation_chars, replacement_char, original_str)
 
     @staticmethod
     def normalize_dash_chars(original_str):
@@ -107,19 +87,3 @@ class Utilities:
         # It returns all the text in a document as a single Unicode string.
         soup = BeautifulSoup(html_str, 'lxml')
         return soup.get_text()
-
-    @staticmethod
-    def impl_1_especiales(original_str, replacement_char):
-        return original_str.translate({ord(char): replacement_char for char in Utilities.format_chars})
-
-    @staticmethod
-    def impl_2_especiales(original_str, replacement_char):
-        return regex.sub(Utilities.regex_format_chars, replacement_char, original_str)
-
-    @staticmethod
-    def impl_1_puntuacion(original_str, replacement_char):
-        return original_str.translate({ord(char): replacement_char for char in Utilities.punctuation_chars})
-
-    @staticmethod
-    def impl_2_puntuacion(original_str, replacement_char):
-        return regex.sub(Utilities.regex_punctuation_chars, replacement_char, original_str)
