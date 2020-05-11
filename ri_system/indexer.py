@@ -14,7 +14,9 @@ class Indexer:
         # TODO: Manejar stopwords
         terms = list()
         for token in tokens:
-            if Utilities.has_only_allowed_chars(token):
+            token = Utilities.handle_dash_chars(token)
+
+            if token and Utilities.has_only_allowed_chars(token):
                 terms.append(token)
             else:
                 # Se imprimen primero los términos que se excluyen
@@ -37,7 +39,9 @@ class Indexer:
             tokens = self.apply_general_rules(html_str)
 
             for token in tokens:
-                if Utilities.has_only_allowed_chars(token) and '-' in token:
+                token = Utilities.handle_dash_chars(token)
+
+                if token and Utilities.has_only_allowed_chars(token) and '-' in token:
                     hyphenated_terms.add(token)
 
         hyphenated_terms_list = list(hyphenated_terms)

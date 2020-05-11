@@ -71,7 +71,24 @@ class Utilities:
 
     @staticmethod
     def normalize_dash_chars(original_str):
-        return regex.sub(Utilities.regex_dash_chars, '-', original_str)
+        normalized_str = regex.sub(Utilities.regex_dash_chars, '-', original_str)
+
+        # Reemplazar los grupos de repetidos leading
+        normalized_str = re.sub(r'(\s+[\-]+)([\S]+)', r' -\2', normalized_str)
+
+        # Reemplazar los grupos de repetidos en medio y trailing
+        normalized_str = re.sub(r'([^\s\-]+)([\-]+)', r'\1-', normalized_str)
+
+        return normalized_str
+
+    @staticmethod
+    def handle_dash_chars(original_str):
+        # Eliminar los leading y trailing restantes
+        return original_str.strip('-')
+
+    @staticmethod
+    def is_dashed_word_exceptions():
+        pass
 
     @staticmethod
     def has_only_allowed_chars(term):
