@@ -1,10 +1,8 @@
-import datetime
 import io
+import re
 
 import nltk
-import re
 from bs4 import BeautifulSoup
-
 
 ALLOWED_CHARS = list()
 
@@ -160,10 +158,10 @@ def run():
 
 
 def main():
-    # run()
+    run()
 
     # Para probar funciones de procesamiento de texto
-    test()
+    # test()
 
     # Para medir tiempo de ejecución
     # begin_time = datetime.datetime.now()
