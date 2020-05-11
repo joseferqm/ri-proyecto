@@ -4,8 +4,11 @@ RI_Coleccion
 # Test files
 original.html
 processed.txt
+hyphenated_terms.txt
 
 .idea
+
+*.zip
 
 # System Files
 .DS_Store
