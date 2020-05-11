@@ -10,7 +10,7 @@ class Indexer:
 
         # TODO: Por ahora se eliminan los términos si tienen caracteres que no correspondan a los admitidos
         # TODO: Por ahora se incluyen los guiones en la lista de caracteres admitidos
-        # TODO: Quitar los guiones leading y trailing
+        # TODO: Manejar excepciones de palabras con guiones
         # TODO: Manejar stopwords
         terms = list()
         for token in tokens:
@@ -67,6 +67,7 @@ class Indexer:
 
         # Regla: Eliminar signos de puntuación y símbolos, y reemplazarlos por espacios en blanco
         # No se eliminan guiones porque se manejan tomando en cuenta excepciones
+        # TODO: Al eliminar la puntuación, considerar casos en que puede ser separador decimal o de miles (. o , rodeado por números)
         text = Utilities.replace_punctuation_chars(text)
 
         # # Regla: Eliminar algunos caracteres especiales de unicode
