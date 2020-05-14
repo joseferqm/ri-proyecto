@@ -1,7 +1,6 @@
 import nltk
 import numpy as np
 
-from ri_system.document_entry import DocumentEntry
 from ri_system.utilities import Utilities
 
 
@@ -27,25 +26,13 @@ class Indexer:
 
         return terms
 
-    def process_collection(self, document_entries):
-        vocabulary = dict()
-
+    def process_collection(self, document_entries, vocabulary):
         for document_entry in document_entries:
             document_terms = self.retrieve_html_str_terms(document_entry.get_html_str())
             document_terms_np_array = np.array(document_terms)
             terms, counts = np.unique(document_terms_np_array, return_counts=True)
-
-            tok_file_name = '{}.tok'.format(document_entry.get_alias())
-            tok_file_lines = list()
-
-            for term_ind, term in enumerate(terms):
-                line = '{} {}'.format(term, counts[term_ind])
-                tok_file_lines.append(line)
-
-            tok_file_str = '\n'.join(line for line in tok_file_lines)
-            Utilities.create_and_save_file(tok_file_name, tok_file_str)
-
-            break
+            terms_dict = dict(zip(terms, counts))
+            document_entry.set_terms_dict(terms_dict)
 
     @staticmethod
     def apply_general_rules(html_str):

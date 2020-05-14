@@ -7,14 +7,14 @@ from ri_system.utilities import Utilities
 
 
 class CollectionHandler:
-    def __init__(self, main_dir, urls_file_name, html_files_dir):
+    def __init__(self, main_dir, urls_file_name, vocabulary_file_name, html_files_dir, tok_files_dir):
         self.__main_dir = main_dir
         self.__urls_file_name = urls_file_name
+        self.__vocabulary_file_name = vocabulary_file_name
         self.__html_files_dir = html_files_dir
+        self.__tok_files_dir = tok_files_dir
 
     def get_html_strings_and_urls_stream(self):
-        strings_stream = list()
-        urls_stream = list()
         document_entries = list()
 
         urls_file_path = '{}/{}'.format(self.__main_dir, self.__urls_file_name)
@@ -39,13 +39,9 @@ class CollectionHandler:
                     document_entry = DocumentEntry(alias, html_str, url)
                     document_entries.append(document_entry)
 
-                    strings_stream.append(html_str)
-                    urls_stream.append(url)
-
             # No es necesario llamar close sobre los archivos porque el contexto en el que está definido cada archivo
             # se encarga de cerrarlo
 
-            # return strings_stream, urls_stream
             return document_entries
         except Exception as e:
             print('Excepción tipo {}:\t{}'.format(type(e), e))
@@ -66,6 +62,21 @@ class CollectionHandler:
             return html_str
         except Exception as e:
             print('Excepción tipo {}:\t{}'.format(type(e), e))
+
+    def create_tok_files(self, document_entries):
+        for document_entry in document_entries:
+            tok_file_path = '{}/{}/{}.tok'.format(self.__main_dir, self.__tok_files_dir, document_entry.get_alias())
+            tok_file_lines = list()
+
+            for term, count in document_entry.get_terms_dict().items():
+                line = '{} {}'.format(term, count)
+                tok_file_lines.append(line)
+
+            tok_file_str = '\n'.join(line for line in tok_file_lines)
+            Utilities.create_and_save_file(tok_file_path, tok_file_str)
+
+    def create_vocabulary_file(self, vocabulary):
+        pass
 
     ########################
     # Funciones para pruebas
