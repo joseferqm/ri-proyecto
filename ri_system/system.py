@@ -1,4 +1,5 @@
 from ri_system.collection_handler import CollectionHandler
+from ri_system.document_entry import DocumentEntry
 from ri_system.indexer import Indexer
 from ri_system.utilities import Utilities
 
@@ -13,16 +14,19 @@ class System:
         self.__indexer = Indexer()
 
         self.__html_strings_stream = None
-        self.__urls_stream = None
+        self.__document_entries = None
 
     def prepare_collection(self):
-        self.__html_strings_stream, self.__urls_stream = self.__collection_handler.get_html_strings_and_urls_stream()
+        self.__document_entries = self.__collection_handler.get_html_strings_and_urls_stream()
 
     def index_collection(self):
-        self.__indexer.process_collection(self.__html_strings_stream)
+        self.__indexer.process_collection(self.__document_entries)
 
+    ########################
+    # Funciones para pruebas
+    ########################
     def create_hyphenated_terms_file(self):
-        self.__indexer.create_hyphenated_terms_file(self.__html_strings_stream)
+        self.__indexer.create_hyphenated_terms_file(self.__document_entries)
 
     def index_random_document(self):
         try:

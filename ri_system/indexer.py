@@ -1,10 +1,12 @@
 import nltk
+import numpy as np
 
+from ri_system.document_entry import DocumentEntry
 from ri_system.utilities import Utilities
 
 
 class Indexer:
-    def process_html_str(self, html_str):
+    def retrieve_html_str_terms(self, html_str):
         # TODO: Procesamiento de la hilera leída del archivo html
         tokens = self.apply_general_rules(html_str)
 
@@ -23,36 +25,27 @@ class Indexer:
                 print(token)
                 print(token.encode('utf-8'))
 
-        processed_html_string = '\n'.join(term for term in terms)
+        return terms
 
-        return processed_html_string
+    def process_collection(self, document_entries):
+        vocabulary = dict()
 
-    def process_collection(self, html_strings_stream):
-        for html_str in html_strings_stream:
-            processed_html_string = self.process_html_str(html_str)
+        for document_entry in document_entries:
+            document_terms = self.retrieve_html_str_terms(document_entry.get_html_str())
+            document_terms_np_array = np.array(document_terms)
+            terms, counts = np.unique(document_terms_np_array, return_counts=True)
 
-    def create_hyphenated_terms_file(self, html_strings_stream):
-        hyphenated_terms = set()
+            tok_file_name = '{}.tok'.format(document_entry.get_alias())
+            tok_file_lines = list()
 
-        for html_str in html_strings_stream:
-            # TODO: Procesamiento de la hilera leída del archivo html
-            tokens = self.apply_general_rules(html_str)
+            for term_ind, term in enumerate(terms):
+                line = '{} {}'.format(term, counts[term_ind])
+                tok_file_lines.append(line)
 
-            for token in tokens:
-                token = Utilities.handle_dash_chars(token)
+            tok_file_str = '\n'.join(line for line in tok_file_lines)
+            Utilities.create_and_save_file(tok_file_name, tok_file_str)
 
-                if token and Utilities.has_only_allowed_chars(token) and '-' in token:
-                    hyphenated_terms.add(token)
-
-        hyphenated_terms_list = list(hyphenated_terms)
-        hyphenated_terms_list.sort()
-
-        hyphenated_terms_string = '\n'.join(hyphenated_term for hyphenated_term in hyphenated_terms_list)
-
-        try:
-            Utilities.create_and_save_file('hyphenated_terms.txt', hyphenated_terms_string)
-        except Exception as e:
-            print('Excepción tipo {}:\t{}'.format(type(e), e))
+            break
 
     @staticmethod
     def apply_general_rules(html_str):
@@ -76,3 +69,33 @@ class Indexer:
         tokens = nltk.word_tokenize(text)
 
         return tokens
+
+    ########################
+    # Funciones para pruebas
+    ########################
+    def create_hyphenated_terms_file(self, html_strings_stream):
+        hyphenated_terms = set()
+
+        for html_str in html_strings_stream:
+            tokens = self.apply_general_rules(html_str)
+
+            for token in tokens:
+                token = Utilities.handle_dash_chars(token)
+
+                if token and Utilities.has_only_allowed_chars(token) and '-' in token:
+                    hyphenated_terms.add(token)
+
+        hyphenated_terms_list = list(hyphenated_terms)
+        hyphenated_terms_list.sort()
+
+        hyphenated_terms_string = '\n'.join(hyphenated_term for hyphenated_term in hyphenated_terms_list)
+
+        try:
+            Utilities.create_and_save_file('hyphenated_terms.txt', hyphenated_terms_string)
+        except Exception as e:
+            print('Excepción tipo {}:\t{}'.format(type(e), e))
+
+    def process_html_str(self, html_str):
+        terms = self.retrieve_html_str_terms(html_str)
+        processed_html_string = '\n'.join(term for term in terms)
+        return processed_html_string
