@@ -67,7 +67,6 @@ class Indexer:
 
         # Regla: Eliminar signos de puntuación y símbolos, y reemplazarlos por espacios en blanco
         # No se eliminan guiones porque se manejan tomando en cuenta excepciones
-        # TODO: Al eliminar la puntuación, considerar casos en que puede ser separador decimal o de miles (. o , rodeado por números)
         text = Utilities.replace_punctuation_chars(text)
 
         # # Regla: Eliminar algunos caracteres especiales de unicode
