@@ -15,8 +15,6 @@ def main():
     ri_system.index_document('covid1.html')
     # delitosinformaticos1.html
 
-    # TODO: Mejorar output con archivo nf1.html. Quedó el término suscríbetesíguenostwitter. Revisar parsing de html
-
     # Para hacer pruebas con un documento aleatorio
     # ri_system.index_random_document()
 
