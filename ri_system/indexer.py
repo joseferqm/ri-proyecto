@@ -19,10 +19,10 @@ class Indexer:
 
             if token and Utilities.has_only_allowed_chars(token):
                 terms.append(token)
-            else:
-                # Se imprimen primero los términos que se excluyen
-                print(token)
-                print(token.encode('utf-8'))
+            # else:
+            #     # Se imprimen primero los términos que se excluyen
+            #     print(token)
+            #     print(token.encode('utf-8'))
 
         return terms
 
@@ -32,6 +32,9 @@ class Indexer:
             document_terms_np_array = np.array(document_terms)
             terms, counts = np.unique(document_terms_np_array, return_counts=True)
             terms_dict = dict(zip(terms, counts))
+            for term_ind, term in enumerate(terms):
+                self.update_vocabulary_dict(vocabulary, term, counts[term_ind])
+
             document_entry.set_terms_dict(terms_dict)
 
     @staticmethod
@@ -56,6 +59,13 @@ class Indexer:
         tokens = nltk.word_tokenize(text)
 
         return tokens
+
+    @staticmethod
+    def update_vocabulary_dict(vocabulary, term, count):
+        if term in vocabulary.keys():
+            vocabulary[term] += count
+        else:
+            vocabulary[term] = count
 
     ########################
     # Funciones para pruebas

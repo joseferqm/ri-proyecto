@@ -76,7 +76,13 @@ class CollectionHandler:
             Utilities.create_and_save_file(tok_file_path, tok_file_str)
 
     def create_vocabulary_file(self, vocabulary):
-        pass
+        vocabulary_file_path = '{}/{}'.format(self.__main_dir, self.__vocabulary_file_name)
+        vocabulary_file_lines = list()
+        for term, count in vocabulary.items():
+            line = '{} {}'.format(term, count)
+            vocabulary_file_lines.append(line)
+        vocabulary_file_str = '\n'.join(line for line in vocabulary_file_lines)
+        Utilities.create_and_save_file(vocabulary_file_path, vocabulary_file_str)
 
     ########################
     # Funciones para pruebas
