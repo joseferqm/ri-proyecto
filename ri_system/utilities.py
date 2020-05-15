@@ -117,7 +117,7 @@ class Utilities:
         # <section id="nav_menu-2" class="nav_menu-2"><h2>SECCIONES</h2><div class="menu-secciones-container"><ul id="menu-secciones-1" class="menu"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-350"><a title="Política" href="https://www.elindependiente.com/politica/">Política</a></li>
         # se obtenga en la hilera resultante 'SECCIONES Política' (con los términos bien separados)
         # y no solo 'SECCIONESPolítica' (con los términos sin separar)
-        blacklist = [
+        tags_ignore = [
             '[document]',
             'noscript',
             'header',
@@ -129,14 +129,11 @@ class Utilities:
             'style',
             'link',
             'form'
-            # there may be more elements you don't want, such as "style", etc.
         ]
-
-        # text_elems = [t for t in soup.find_all(text=True) if t.parent.name not in blacklist]
 
         text_elems = list()
         for t in soup.find_all(text=True):
-            if t.parent.name not in blacklist and not isinstance(t, Comment):
+            if t.parent.name not in tags_ignore and not isinstance(t, Comment):
                 text_elems.append(t)
 
         print(text_elems)
