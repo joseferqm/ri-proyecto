@@ -10,5 +10,5 @@ class DocumentEntry:
     def get_html_str(self):
         return self.__html_str
 
-    def get_html_str(self):
-        return self.__html_str
+    def get_url(self):
+        return self.__url
