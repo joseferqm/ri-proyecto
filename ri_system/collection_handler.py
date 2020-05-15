@@ -33,6 +33,7 @@ class CollectionHandler:
                 html_file_name = line_elems[0]
                 alias = html_file_name.replace('.html', '')
                 html_str = self.get_html_string(html_file_name)
+                # TODO manejar urls
                 url = line_elems[1]
 
                 document_entry = DocumentEntry(alias, html_str, url)
