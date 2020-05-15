@@ -25,7 +25,7 @@ class Utilities:
 
     @staticmethod
     def get_file(file_path):
-        return open(file_path)
+        return open(file_path, encoding='utf-8-sig')
 
     @staticmethod
     def create_and_save_file(file_path, text):

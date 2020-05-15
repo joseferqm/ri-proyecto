@@ -1,5 +1,6 @@
 import nltk
 import numpy as np
+from nltk.corpus import stopwords
 
 from ri_system.utilities import Utilities
 
@@ -12,14 +13,14 @@ class Indexer:
         # TODO: Por ahora se eliminan los términos si tienen caracteres que no correspondan a los admitidos
         # TODO: Por ahora se incluyen los guiones en la lista de caracteres admitidos
         # TODO: Manejar excepciones de palabras con guiones
-        # TODO: Manejar stopwords
         # TODO: Manejar valores numéricos con rango
         terms = list()
         for token in tokens:
             token = Utilities.handle_dash_chars(token)
 
-            if token and Utilities.has_only_allowed_chars(token):
+            if token and Utilities.has_only_allowed_chars(token) and token not in stopwords.words('spanish'):
                 terms.append(token)
+
             # else:
             #     # Se imprimen primero los términos que se excluyen
             #     print(token)
@@ -28,9 +29,11 @@ class Indexer:
         return terms
 
     def process_collection(self, document_entries, collection_handler):
+        collection_handler.create_tok_dir()
         vocabulary = dict()
 
         for document_entry in document_entries:
+            print(document_entry.get_alias())
             document_html_str = document_entry.get_html_str()
             document_terms = self.retrieve_html_str_terms(document_html_str)
             tok_file_lines = list()
@@ -113,10 +116,7 @@ class Indexer:
 
         hyphenated_terms_string = '\n'.join(hyphenated_term for hyphenated_term in hyphenated_terms_list)
 
-        try:
-            Utilities.create_and_save_file('hyphenated_terms.txt', hyphenated_terms_string)
-        except Exception as e:
-            print('Excepción tipo {}:\t{}'.format(type(e), e))
+        Utilities.create_and_save_file('hyphenated_terms.txt', hyphenated_terms_string)
 
     def process_html_str(self, html_str):
         terms = self.retrieve_html_str_terms(html_str)

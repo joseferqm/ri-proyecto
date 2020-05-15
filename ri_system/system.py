@@ -30,19 +30,13 @@ class System:
         self.__indexer.create_hyphenated_terms_file(self.__document_entries)
 
     def index_random_document(self):
-        try:
-            html_string = self.__collection_handler.get_random_html_string()
-            processed_html_string = self.__indexer.process_html_str(html_string)
-            Utilities.create_and_save_file('original.html', html_string)
-            Utilities.create_and_save_file('processed.txt', processed_html_string)
-        except Exception as e:
-            print('Excepción tipo {}:\t{}'.format(type(e), e))
+        html_string = self.__collection_handler.get_random_html_string()
+        processed_html_string = self.__indexer.process_html_str(html_string)
+        Utilities.create_and_save_file('original.html', html_string)
+        Utilities.create_and_save_file('processed.txt', processed_html_string)
 
     def index_document(self, file_name):
-        try:
-            html_string = self.__collection_handler.get_html_string(file_name)
-            processed_html_string = self.__indexer.process_html_str(html_string)
-            Utilities.create_and_save_file('original.html', html_string)
-            Utilities.create_and_save_file('processed.txt', processed_html_string)
-        except Exception as e:
-            print('Excepción tipo {}:\t{}'.format(type(e), e))
+        html_string = self.__collection_handler.get_html_string(file_name)
+        processed_html_string = self.__indexer.process_html_str(html_string)
+        Utilities.create_and_save_file('original.html', html_string)
+        Utilities.create_and_save_file('processed.txt', processed_html_string)
