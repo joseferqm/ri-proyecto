@@ -39,11 +39,8 @@ class Utilities:
             return file.read()
         except UnicodeError:
             pass
-        try:
-            alternative_file = io.open(file_path, encoding='latin-1')
-            return alternative_file.read()
-        except Exception:
-            raise
+        alternative_file = io.open(file_path, encoding='latin-1')
+        return alternative_file.read()
 
     @staticmethod
     def remove_unicode_format_chars(original_str):
