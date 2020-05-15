@@ -16,15 +16,12 @@ class System:
         self.__indexer = Indexer()
 
         self.__document_entries = None
-        self.__vocabulary = dict()
 
     def prepare_collection(self):
         self.__document_entries = self.__collection_handler.get_html_strings_and_urls_stream()
 
     def index_collection(self):
-        self.__indexer.process_collection(self.__document_entries, self.__vocabulary)
-        self.__collection_handler.create_tok_files(self.__document_entries)
-        self.__collection_handler.create_vocabulary_file(self.__vocabulary)
+        self.__indexer.process_collection(self.__document_entries, self.__collection_handler)
 
     ########################
     # Funciones para pruebas

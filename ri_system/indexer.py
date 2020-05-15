@@ -13,6 +13,7 @@ class Indexer:
         # TODO: Por ahora se incluyen los guiones en la lista de caracteres admitidos
         # TODO: Manejar excepciones de palabras con guiones
         # TODO: Manejar stopwords
+        # TODO: Manejar valores numéricos con rango
         terms = list()
         for token in tokens:
             token = Utilities.handle_dash_chars(token)
@@ -26,16 +27,41 @@ class Indexer:
 
         return terms
 
-    def process_collection(self, document_entries, vocabulary):
-        for document_entry in document_entries:
-            document_terms = self.retrieve_html_str_terms(document_entry.get_html_str())
-            document_terms_np_array = np.array(document_terms)
-            terms, counts = np.unique(document_terms_np_array, return_counts=True)
-            terms_dict = dict(zip(terms, counts))
-            for term_ind, term in enumerate(terms):
-                self.update_vocabulary_dict(vocabulary, term, counts[term_ind])
+    def process_collection(self, document_entries, collection_handler):
+        vocabulary = dict()
 
-            document_entry.set_terms_dict(terms_dict)
+        for document_entry in document_entries:
+            document_html_str = document_entry.get_html_str()
+            document_terms = self.retrieve_html_str_terms(document_html_str)
+            tok_file_lines = list()
+
+            if len(document_terms) > 0:
+                document_terms_np_array = np.array(document_terms)
+                terms, counts = np.unique(document_terms_np_array, return_counts=True)
+                max_l_freq_lj = max(counts)
+
+                for term_ind, term in enumerate(terms):
+                    freq_ij = counts[term_ind]  # freq_ij = la frecuencia del término k_i en el documento d_j
+                    f_ij = freq_ij / max_l_freq_lj  # f_ij = la frecuencia normalizada del término k_i en el documento d_j.
+                    # Se calcula como freq_ij divido por la frecuencia del término más frecuente en el documento d_j
+                    line = '{} {} {}'.format(term, freq_ij, f_ij)
+                    tok_file_lines.append(line)
+                    self.update_vocabulary_dict(vocabulary, term, freq_ij)
+            else:
+                print(document_entry.get_alias())
+                tok_file_lines.append('\n')
+
+            collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
+
+        vocabulary_file_lines = list()
+
+        for term, values_tuple in vocabulary.items():
+            doc_count = values_tuple[0]
+            col_freq_count = values_tuple[1]
+            line = '{} {} {}'.format(term, doc_count, col_freq_count)
+            vocabulary_file_lines.append(line)
+
+        collection_handler.create_vocabulary_file(vocabulary_file_lines)
 
     @staticmethod
     def apply_general_rules(html_str):
@@ -63,9 +89,9 @@ class Indexer:
     @staticmethod
     def update_vocabulary_dict(vocabulary, term, count):
         if term in vocabulary.keys():
-            vocabulary[term] += count
+            vocabulary[term] = (vocabulary[term][0] + 1, vocabulary[term][1] + count)
         else:
-            vocabulary[term] = count
+            vocabulary[term] = (1, count)
 
     ########################
     # Funciones para pruebas

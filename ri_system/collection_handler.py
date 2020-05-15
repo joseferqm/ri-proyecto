@@ -63,25 +63,14 @@ class CollectionHandler:
         except Exception as e:
             print('Excepción tipo {}:\t{}'.format(type(e), e))
 
-    def create_tok_files(self, document_entries):
-        for document_entry in document_entries:
-            tok_file_path = '{}/{}/{}.tok'.format(self.__main_dir, self.__tok_files_dir, document_entry.get_alias())
-            tok_file_lines = list()
+    def create_tok_file(self, document_entry_alias, lines):
+        tok_file_path = '{}/{}/{}.tok'.format(self.__main_dir, self.__tok_files_dir, document_entry_alias)
+        tok_file_str = '\n'.join(line for line in lines)
+        Utilities.create_and_save_file(tok_file_path, tok_file_str)
 
-            for term, count in document_entry.get_terms_dict().items():
-                line = '{} {}'.format(term, count)
-                tok_file_lines.append(line)
-
-            tok_file_str = '\n'.join(line for line in tok_file_lines)
-            Utilities.create_and_save_file(tok_file_path, tok_file_str)
-
-    def create_vocabulary_file(self, vocabulary):
+    def create_vocabulary_file(self, lines):
         vocabulary_file_path = '{}/{}'.format(self.__main_dir, self.__vocabulary_file_name)
-        vocabulary_file_lines = list()
-        for term, count in vocabulary.items():
-            line = '{} {}'.format(term, count)
-            vocabulary_file_lines.append(line)
-        vocabulary_file_str = '\n'.join(line for line in vocabulary_file_lines)
+        vocabulary_file_str = '\n'.join(line for line in lines)
         Utilities.create_and_save_file(vocabulary_file_path, vocabulary_file_str)
 
     ########################
