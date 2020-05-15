@@ -1,6 +1,7 @@
 import io
 import re
 import string
+import unicodedata
 
 import regex
 from bs4 import BeautifulSoup, Comment
@@ -18,10 +19,14 @@ class Utilities:
         '[\p{Symbol}&&\p{Open_Punctuation}&&\p{Close_Punctuation}&&\p{Initial_Punctuation}&&\p{Final_Punctuation}&&\p{Connector_Punctuation}&&\p{Other_Punctuation}]'
     )
     regex_dash_chars = regex.compile('\p{Dash_Punctuation}')
+    regex_digit_chars = regex.compile('\p{Digit}')
 
     additional_chars = ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ', '-']
     allowed_chars = string.digits + string.ascii_lowercase + ''.join(c for c in additional_chars)
     regex_allowed_chars = re.compile('[' + allowed_chars + ']')
+
+    min_number = 0
+    max_number = 10000
 
     @staticmethod
     def get_file(file_path):
@@ -68,6 +73,7 @@ class Utilities:
 
     @staticmethod
     def normalize_dash_chars(original_str):
+        # Remplazar todos los que sean Dash_Punctuation por '-'
         normalized_str = regex.sub(Utilities.regex_dash_chars, '-', original_str)
 
         # Reemplazar los grupos de repetidos leading
@@ -80,12 +86,23 @@ class Utilities:
 
     @staticmethod
     def handle_dash_chars(original_str):
-        # Eliminar los leading y trailing restantes
+        # Eliminar leading y trailing
         return original_str.strip('-')
 
     @staticmethod
-    def is_dashed_word_exceptions():
-        pass
+    def is_dashed_word_exception(term):
+        return False
+
+    @staticmethod
+    def in_range(number):
+        return Utilities.min_number <= number <= Utilities.max_number
+
+    @staticmethod
+    def has_only_digits(term):
+        for char in term:
+            if not regex.match(Utilities.regex_digit_chars, char):
+                return False
+        return True
 
     @staticmethod
     def has_only_allowed_chars(term):
@@ -93,6 +110,11 @@ class Utilities:
             if not re.match(Utilities.regex_allowed_chars, char):
                 return False
         return True
+
+    @staticmethod
+    def normalize_special_chars(original_str):
+        norm = unicodedata.normalize('NFKD', original_str)
+        return ''.join(char for char in norm if not unicodedata.combining(char))
 
     @staticmethod
     def get_text_from_html_str(html_str):

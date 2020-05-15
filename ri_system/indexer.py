@@ -7,19 +7,56 @@ from ri_system.utilities import Utilities
 
 class Indexer:
     def retrieve_html_str_terms(self, html_str):
-        # TODO: Procesamiento de la hilera leída del archivo html
         tokens = self.apply_general_rules(html_str)
 
-        # TODO: Por ahora se eliminan los términos si tienen caracteres que no correspondan a los admitidos
         # TODO: Por ahora se incluyen los guiones en la lista de caracteres admitidos
         # TODO: Manejar excepciones de palabras con guiones
-        # TODO: Manejar valores numéricos con rango
         terms = list()
-        for token in tokens:
+
+        while tokens:
+            token = tokens.pop()
+
+            # Eliminar los guiones leading y trailing restantes
             token = Utilities.handle_dash_chars(token)
 
-            if token and Utilities.has_only_allowed_chars(token) and token not in stopwords.words('spanish'):
-                terms.append(token)
+            # Ignorar si es hilera vacía
+            if not token:
+                continue
+
+            if Utilities.has_only_digits(token):
+                # Se intenta interpretar términos que corresponden a números solo como enteros positivos
+                # porque separadores de decimales (y miles) se reemplazaron por espacios en blanco al manejar
+                # caracteres de puntuación y porque rango inicia en 0
+                number = int(token)
+                if Utilities.in_range(number):
+                    terms.append(str(number))
+            else:
+                if Utilities.has_only_allowed_chars(token):
+                    # Caso del token que solo tiene caracteres permitidos
+                    if '-' not in token:
+                        # Caso del token que no tiene guiones. Se verifica si no es stop word
+                        # y se pone en la lista de términos
+                        if token not in stopwords.words('spanish'):
+                            terms.append(token)
+                    else:
+                        # Caso del token que tiene guiones. Se verifica si es una excepción y si lo es se pone
+                        # sin modificar en la lista de términos.
+                        # Si no lo es, se divide en el guion y se ponen ambas partes en la lista de tokens por procesar
+                        if Utilities.is_dashed_word_exception(token):
+                            terms.append(token)
+                        else:
+                            sub_tokens = token.split('-')
+                            for sub_token in sub_tokens:
+                                tokens.append(sub_token)
+                else:
+                    # Caso del token que tiene caracteres no permitidos. Se transforma y si ahora solo tiene
+                    # caracteres permitidos, se pone modificado en la lista de tokens por procesar
+                    norm_token = Utilities.normalize_special_chars(token)
+                    if Utilities.has_only_allowed_chars(norm_token):
+                        tokens.append(norm_token)
+                    else:
+                        print('\t{}'.format(token))
+                        print('\t{}'.format(token.encode('utf-8')))
 
             # else:
             #     # Se imprimen primero los términos que se excluyen
@@ -40,6 +77,8 @@ class Indexer:
 
             if len(document_terms) > 0:
                 document_terms_np_array = np.array(document_terms)
+                # El archivo tok debe estar ordenado alfabéticamente
+                # unique returns the sorted unique elements of an array
                 terms, counts = np.unique(document_terms_np_array, return_counts=True)
                 max_l_freq_lj = max(counts)
 
@@ -58,7 +97,8 @@ class Indexer:
 
         vocabulary_file_lines = list()
 
-        for term, values_tuple in vocabulary.items():
+        # El archivo Vocabulario debe estar ordenado alfabéticamente
+        for term, values_tuple in sorted(vocabulary.items()):
             doc_count = values_tuple[0]
             col_freq_count = values_tuple[1]
             line = '{} {} {}'.format(term, doc_count, col_freq_count)
