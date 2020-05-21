@@ -98,7 +98,7 @@ class Indexer:
                     freq_ij = counts[term_ind]  # freq_ij = la frecuencia del término k_i en el documento d_j
                     f_ij = freq_ij / max_l_freq_lj  # f_ij = la frecuencia normalizada del término k_i en el documento d_j.
                     # Se calcula como freq_ij divido por la frecuencia del término más frecuente en el documento d_j
-                    line = '{} {} {}'.format(term, freq_ij, f_ij)
+                    line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(f_ij))
                     tok_file_lines.append(line)
                     self.update_vocabulary_dict(vocabulary, term, freq_ij)
             else:
@@ -107,17 +107,17 @@ class Indexer:
 
             # TODO: PRUEBAS
             for long_elem in long:
-                line = '{:20} {}'.format(document_entry.get_alias(), long_elem)
+                line = '{:35} {}'.format(document_entry.get_alias(), long_elem)
                 long_file_lines.append(line)
 
             # TODO: PRUEBAS
             for special_elem in special:
-                line = '{:20} {}'.format(document_entry.get_alias(), special_elem)
+                line = '{:35} {}'.format(document_entry.get_alias(), special_elem)
                 special_file_lines.append(line)
 
             # TODO: PRUEBAS
             for dash_elem in dash:
-                line = '{:20} {}'.format(document_entry.get_alias(), dash_elem)
+                line = '{:35} {}'.format(document_entry.get_alias(), dash_elem)
                 dash_file_lines.append(line)
 
             collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
@@ -128,7 +128,7 @@ class Indexer:
         for term, values_tuple in sorted(vocabulary.items()):
             doc_count = values_tuple[0]
             col_freq_count = values_tuple[1]
-            line = '{} {} {}'.format(term, doc_count, col_freq_count)
+            line = '{:30} {:12} {:20}'.format(term, str(doc_count), str(col_freq_count))
             vocabulary_file_lines.append(line)
 
         collection_handler.create_vocabulary_file(vocabulary_file_lines)
