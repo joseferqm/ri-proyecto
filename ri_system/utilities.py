@@ -9,10 +9,12 @@ from bs4 import BeautifulSoup, Comment
 
 class Utilities:
     # https://www.regular-expressions.info/unicode.html
+    # \p{C} or \p{Other}: invisible control characters and unused code points.
     # \p{Cf} or \p{Format}: invisible formatting indicator.
     # \p{P} or \p{Punctuation}: any kind of punctuation character.
     # \p{Pd} or \p{Dash_Punctuation}: any kind of hyphen or dash.
 
+    regex_all_other_chars = regex.compile('\p{Other}')
     regex_format_chars = regex.compile('\p{Format}')
     # Se debe hacer de esta manera porque [\p{Punctuation}--\p{Dash_Punctuation}] no funciona
     regex_punctuation_chars = regex.compile(
@@ -49,28 +51,36 @@ class Utilities:
         return alternative_file.read()
 
     @staticmethod
+    def replace_unicode_all_other_chars(original_str):
+        return Utilities.handle_group_chars(Utilities.regex_all_other_chars, original_str, ' ')
+
+    @staticmethod
     def remove_unicode_format_chars(original_str):
-        return Utilities.handle_unicode_format_chars(original_str)
+        return Utilities.handle_group_chars(Utilities.regex_format_chars, original_str)
 
-    @staticmethod
-    def replace_unicode_format_chars(original_str):
-        return Utilities.handle_unicode_format_chars(original_str, ' ')
+    # @staticmethod
+    # def replace_unicode_format_chars(original_str):
+    #     return Utilities.handle_group_chars(Utilities.regex_format_chars, original_str, ' ')
 
-    @staticmethod
-    def handle_unicode_format_chars(original_str, replacement_char=''):
-        return regex.sub(Utilities.regex_format_chars, replacement_char, original_str)
-
-    @staticmethod
-    def remove_punctuation_chars(original_str):
-        return Utilities.handle_punctuation_chars(original_str)
+    # @staticmethod
+    # def remove_punctuation_chars(original_str):
+    #     return Utilities.handle_group_chars(Utilities.regex_punctuation_chars, original_str)
 
     @staticmethod
     def replace_punctuation_chars(original_str):
-        return Utilities.handle_punctuation_chars(original_str, ' ')
+        return Utilities.handle_group_chars(Utilities.regex_punctuation_chars, original_str, ' ')
 
     @staticmethod
-    def handle_punctuation_chars(original_str, replacement_char=''):
-        return regex.sub(Utilities.regex_punctuation_chars, replacement_char, original_str)
+    def handle_group_chars(group, original_str, replacement_char=''):
+        return regex.sub(group, replacement_char, original_str)
+
+    # @staticmethod
+    # def handle_unicode_format_chars(original_str, replacement_char=''):
+    #     return regex.sub(Utilities.regex_format_chars, replacement_char, original_str)
+
+    # @staticmethod
+    # def handle_punctuation_chars(original_str, replacement_char=''):
+    #     return regex.sub(Utilities.regex_punctuation_chars, replacement_char, original_str)
 
     @staticmethod
     def normalize_dash_chars(original_str):

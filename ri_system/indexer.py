@@ -160,8 +160,9 @@ class Indexer:
         # No se eliminan guiones porque se manejan tomando en cuenta excepciones
         text = Utilities.replace_punctuation_chars(text)
 
-        # # Regla: Eliminar algunos caracteres especiales de unicode
-        text = Utilities.replace_unicode_format_chars(text)
+        # Regla: Eliminar algunos caracteres especiales de unicode
+        # Ahora se reemplazarn todos los de control por espacios en blanco
+        text = Utilities.replace_unicode_all_other_chars(text)
 
         # Regla: Eliminar espacios en blanco
         tokens = nltk.word_tokenize(text)
