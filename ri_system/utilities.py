@@ -58,14 +58,6 @@ class Utilities:
     def remove_unicode_format_chars(original_str):
         return Utilities.handle_group_chars(Utilities.regex_format_chars, original_str)
 
-    # @staticmethod
-    # def replace_unicode_format_chars(original_str):
-    #     return Utilities.handle_group_chars(Utilities.regex_format_chars, original_str, ' ')
-
-    # @staticmethod
-    # def remove_punctuation_chars(original_str):
-    #     return Utilities.handle_group_chars(Utilities.regex_punctuation_chars, original_str)
-
     @staticmethod
     def replace_punctuation_chars(original_str):
         return Utilities.handle_group_chars(Utilities.regex_punctuation_chars, original_str, ' ')
@@ -73,14 +65,6 @@ class Utilities:
     @staticmethod
     def handle_group_chars(group, original_str, replacement_char=''):
         return regex.sub(group, replacement_char, original_str)
-
-    # @staticmethod
-    # def handle_unicode_format_chars(original_str, replacement_char=''):
-    #     return regex.sub(Utilities.regex_format_chars, replacement_char, original_str)
-
-    # @staticmethod
-    # def handle_punctuation_chars(original_str, replacement_char=''):
-    #     return regex.sub(Utilities.regex_punctuation_chars, replacement_char, original_str)
 
     @staticmethod
     def normalize_dash_chars(original_str):
