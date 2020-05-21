@@ -6,11 +6,9 @@ from ri_system.utilities import Utilities
 
 
 class Indexer:
-    def retrieve_html_str_terms(self, html_str, long, special):
+    def retrieve_html_str_terms(self, html_str, long, special, dash):
         tokens = self.apply_general_rules(html_str)
 
-        # TODO: Por ahora se incluyen los guiones en la lista de caracteres admitidos
-        # TODO: Manejar excepciones de palabras con guiones
         terms = list()
 
         while tokens:
@@ -37,8 +35,8 @@ class Indexer:
                         # Caso del token que no tiene guiones. Se verifica si no es stop word
                         # y se pone en la lista de términos
                         if token not in stopwords.words('spanish'):
-                            # TODO: Implementar regla de extraer términos de tamaño máximo 30
-                            if len(token) <= 30:
+                            # Regla de extraer términos de tamaño máximo 30
+                            if len(token) <= Utilities.max_term_length:
                                 terms.append(token)
                             else:
                                 long.append(token)
@@ -47,12 +45,13 @@ class Indexer:
                         # sin modificar en la lista de términos.
                         # Si no lo es, se divide en el guion y se ponen ambas partes en la lista de tokens por procesar
                         if Utilities.is_dashed_word_exception(token):
-                            # TODO: Implementar regla de extraer términos de tamaño máximo 30
-                            if len(token) <= 30:
+                            # Regla de extraer términos de tamaño máximo 30
+                            if len(token) <= Utilities.max_term_length:
                                 terms.append(token)
                             else:
                                 long.append(token)
                         else:
+                            dash.append(token)
                             sub_tokens = token.split('-')
                             for sub_token in sub_tokens:
                                 tokens.append(sub_token)
@@ -63,12 +62,7 @@ class Indexer:
                     if Utilities.has_only_allowed_chars(norm_token):
                         tokens.append(norm_token)
                     else:
-                        special.append('{} -> {}'.format(token, token.encode('utf-8')))
-
-            # else:
-            #     # Se imprimen primero los términos que se excluyen
-            #     print(token)
-            #     print(token.encode('utf-8'))
+                        special.append('{:50} {}'.format(token, token.encode('utf-8')))
 
         return terms
 
@@ -79,6 +73,7 @@ class Indexer:
         # TODO: pruebas
         long_file_lines = list()
         special_file_lines = list()
+        dash_file_lines = list()
 
         for document_entry in document_entries:
             print(document_entry.get_alias())
@@ -86,9 +81,10 @@ class Indexer:
             # TODO: pruebas
             long = list()
             special = list()
+            dash = list()
 
             document_html_str = document_entry.get_html_str()
-            document_terms = self.retrieve_html_str_terms(document_html_str, long, special)
+            document_terms = self.retrieve_html_str_terms(document_html_str, long, special, dash)
             tok_file_lines = list()
 
             if len(document_terms) > 0:
@@ -111,13 +107,18 @@ class Indexer:
 
             # TODO: PRUEBAS
             for long_elem in long:
-                line = '{}\t\t\t{}'.format(document_entry.get_alias(), long_elem)
+                line = '{:20} {}'.format(document_entry.get_alias(), long_elem)
                 long_file_lines.append(line)
 
             # TODO: PRUEBAS
             for special_elem in special:
-                line = '{}\t\t\t{}'.format(document_entry.get_alias(), special_elem)
+                line = '{:20} {}'.format(document_entry.get_alias(), special_elem)
                 special_file_lines.append(line)
+
+            # TODO: PRUEBAS
+            for dash_elem in dash:
+                line = '{:20} {}'.format(document_entry.get_alias(), dash_elem)
+                dash_file_lines.append(line)
 
             collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
 
@@ -139,6 +140,10 @@ class Indexer:
         # TODO: PRUEBAS
         special_file_str = '\n'.join(line for line in special_file_lines)
         Utilities.create_and_save_file('special.txt', special_file_str)
+
+        # TODO: PRUEBAS
+        dash_file_str = '\n'.join(line for line in dash_file_lines)
+        Utilities.create_and_save_file('dash.txt', dash_file_str)
 
     @staticmethod
     def apply_general_rules(html_str):
@@ -173,25 +178,6 @@ class Indexer:
     ########################
     # Funciones para pruebas
     ########################
-    def create_hyphenated_terms_file(self, html_strings_stream):
-        hyphenated_terms = set()
-
-        for html_str in html_strings_stream:
-            tokens = self.apply_general_rules(html_str)
-
-            for token in tokens:
-                token = Utilities.handle_dash_chars(token)
-
-                if token and Utilities.has_only_allowed_chars(token) and '-' in token:
-                    hyphenated_terms.add(token)
-
-        hyphenated_terms_list = list(hyphenated_terms)
-        hyphenated_terms_list.sort()
-
-        hyphenated_terms_string = '\n'.join(hyphenated_term for hyphenated_term in hyphenated_terms_list)
-
-        Utilities.create_and_save_file('hyphenated_terms.txt', hyphenated_terms_string)
-
     def process_html_str(self, html_str):
         long = list()
         special = list()

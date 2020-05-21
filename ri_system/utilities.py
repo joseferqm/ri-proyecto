@@ -25,6 +25,7 @@ class Utilities:
     allowed_chars = string.digits + string.ascii_lowercase + ''.join(c for c in additional_chars)
     regex_allowed_chars = re.compile('[' + allowed_chars + ']')
 
+    max_term_length = 30
     min_number = 0
     max_number = 10000
 
@@ -122,6 +123,10 @@ class Utilities:
 
     @staticmethod
     def get_text_from_html_str(html_str):
+
+        if True:
+            html_str = html_str.replace('>', '> ')
+
         # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#beautifulsoup
         soup = BeautifulSoup(html_str, "html.parser")
 

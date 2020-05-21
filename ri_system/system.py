@@ -26,9 +26,6 @@ class System:
     ########################
     # Funciones para pruebas
     ########################
-    def create_hyphenated_terms_file(self):
-        self.__indexer.create_hyphenated_terms_file(self.__document_entries)
-
     def index_random_document(self):
         html_string = self.__collection_handler.get_random_html_string()
         processed_html_string = self.__indexer.process_html_str(html_string)
