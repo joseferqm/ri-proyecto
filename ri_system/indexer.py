@@ -6,7 +6,7 @@ from ri_system.utilities import Utilities
 
 
 class Indexer:
-    def retrieve_html_str_terms(self, html_str):
+    def retrieve_html_str_terms(self, html_str, long, special):
         tokens = self.apply_general_rules(html_str)
 
         # TODO: Por ahora se incluyen los guiones en la lista de caracteres admitidos
@@ -37,13 +37,21 @@ class Indexer:
                         # Caso del token que no tiene guiones. Se verifica si no es stop word
                         # y se pone en la lista de términos
                         if token not in stopwords.words('spanish'):
-                            terms.append(token)
+                            # TODO: Implementar regla de extraer términos de tamaño máximo 30
+                            if len(token) <= 30:
+                                terms.append(token)
+                            else:
+                                long.append(token)
                     else:
                         # Caso del token que tiene guiones. Se verifica si es una excepción y si lo es se pone
                         # sin modificar en la lista de términos.
                         # Si no lo es, se divide en el guion y se ponen ambas partes en la lista de tokens por procesar
                         if Utilities.is_dashed_word_exception(token):
-                            terms.append(token)
+                            # TODO: Implementar regla de extraer términos de tamaño máximo 30
+                            if len(token) <= 30:
+                                terms.append(token)
+                            else:
+                                long.append(token)
                         else:
                             sub_tokens = token.split('-')
                             for sub_token in sub_tokens:
@@ -55,8 +63,7 @@ class Indexer:
                     if Utilities.has_only_allowed_chars(norm_token):
                         tokens.append(norm_token)
                     else:
-                        print('\t{}'.format(token))
-                        print('\t{}'.format(token.encode('utf-8')))
+                        special.append('{} -> {}'.format(token, token.encode('utf-8')))
 
             # else:
             #     # Se imprimen primero los términos que se excluyen
@@ -69,10 +76,19 @@ class Indexer:
         collection_handler.create_tok_dir()
         vocabulary = dict()
 
+        # TODO: pruebas
+        long_file_lines = list()
+        special_file_lines = list()
+
         for document_entry in document_entries:
             print(document_entry.get_alias())
+
+            # TODO: pruebas
+            long = list()
+            special = list()
+
             document_html_str = document_entry.get_html_str()
-            document_terms = self.retrieve_html_str_terms(document_html_str)
+            document_terms = self.retrieve_html_str_terms(document_html_str, long, special)
             tok_file_lines = list()
 
             if len(document_terms) > 0:
@@ -93,6 +109,16 @@ class Indexer:
                 print(document_entry.get_alias())
                 tok_file_lines.append('\n')
 
+            # TODO: PRUEBAS
+            for long_elem in long:
+                line = '{}\t\t\t{}'.format(document_entry.get_alias(), long_elem)
+                long_file_lines.append(line)
+
+            # TODO: PRUEBAS
+            for special_elem in special:
+                line = '{}\t\t\t{}'.format(document_entry.get_alias(), special_elem)
+                special_file_lines.append(line)
+
             collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
 
         vocabulary_file_lines = list()
@@ -105,6 +131,14 @@ class Indexer:
             vocabulary_file_lines.append(line)
 
         collection_handler.create_vocabulary_file(vocabulary_file_lines)
+
+        # TODO: PRUEBAS
+        long_file_str = '\n'.join(line for line in long_file_lines)
+        Utilities.create_and_save_file('long.txt', long_file_str)
+
+        # TODO: PRUEBAS
+        special_file_str = '\n'.join(line for line in special_file_lines)
+        Utilities.create_and_save_file('special.txt', special_file_str)
 
     @staticmethod
     def apply_general_rules(html_str):
@@ -159,6 +193,8 @@ class Indexer:
         Utilities.create_and_save_file('hyphenated_terms.txt', hyphenated_terms_string)
 
     def process_html_str(self, html_str):
-        terms = self.retrieve_html_str_terms(html_str)
+        long = list()
+        special = list()
+        terms = self.retrieve_html_str_terms(html_str, long, special)
         processed_html_string = '\n'.join(term for term in terms)
         return processed_html_string
