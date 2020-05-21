@@ -91,6 +91,10 @@ class Utilities:
 
     @staticmethod
     def is_dashed_word_exception(term):
+        # Colección de excepciones permitidas
+        exceptions = ["pre-", "post-", "pos-", "sub-", "vice-", "súper-"]
+        if any(x in term for x in exceptions):
+            return True
         return False
 
     @staticmethod
