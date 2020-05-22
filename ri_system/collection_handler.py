@@ -1,6 +1,4 @@
-import glob
 import os
-import random
 
 from ri_system.document_entry import DocumentEntry
 from ri_system.utilities import Utilities
@@ -81,18 +79,3 @@ class CollectionHandler:
     def create_tok_dir(self):
         if not os.path.isdir('{}/{}'.format(self.__main_dir, self.__tok_files_dir)):
             os.mkdir('{}/{}'.format(self.__main_dir, self.__tok_files_dir))
-
-    ########################
-    # Funciones para pruebas
-    ########################
-
-    def get_random_html_string(self):
-        html_files_path = '{}/{}/{}'.format(os.getcwd(), self.__main_dir, self.__html_files_dir)
-        html_files_vect = glob.glob('{}/*.html'.format(html_files_path))
-        html_files_count = len(html_files_vect)
-        rand = random.randint(0, html_files_count - 1)
-        html_file_path = html_files_vect[rand]
-
-        print(html_file_path)
-
-        return self.get_html_string(html_file_path, False)
