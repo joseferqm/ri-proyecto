@@ -1,8 +1,8 @@
-import sys # pip install cx_Freeze
+import sys  # pip install cx_Freeze
 from cx_Freeze import setup, Executable
 
 include_files = ['autorun.inf']
-nase = None
+base = None
 
 if sys.platform == "win32":
     base = "Win32GUI"
@@ -12,3 +12,5 @@ setup(name="Proyecto_ParteII",
       description="Segunda parte del proyecto de RI",
       options={'build_exe': {'include_files': include_files}},
       executables={Executable("main.py", base=base)})
+
+# to run: 'python setup.py build'
