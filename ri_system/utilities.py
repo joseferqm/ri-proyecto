@@ -40,7 +40,7 @@ class Utilities:
 
     @staticmethod
     def create_and_save_file(file_path, text):
-        f = open(file_path, 'w')
+        f = open(file_path, 'w', encoding='utf-8')
         f.write(text)
         f.close()
 
