@@ -2,7 +2,7 @@ from ri_system.system import System
 
 
 def main():
-    ri_system = System()
+    ri_system = System(True)
 
     ri_system.prepare_collection()
     ri_system.index_collection()

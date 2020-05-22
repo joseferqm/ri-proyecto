@@ -14,10 +14,13 @@ class CollectionHandler:
         self.__html_files_dir = html_files_dir
         self.__tok_files_dir = tok_files_dir
 
-    def get_html_strings_and_urls_stream(self):
+    def get_html_strings_and_urls_stream(self, debug):
         document_entries = list()
 
         urls_file_path = '{}/{}'.format(self.__main_dir, self.__urls_file_name)
+
+        if debug:
+            print('Leyendo {}...'.format(self.__urls_file_name))
 
         with Utilities.get_file(urls_file_path) as urls_file:
             for ind, line in enumerate(urls_file):
@@ -27,11 +30,18 @@ class CollectionHandler:
                 # Se elimina el caracter de nueva línea
                 line = line.replace('\n', '')
 
+                if debug:
+                    print('Línea: {}'.format(line))
+
                 # Al separar las líneas por espacios en blanco, el primer elemento de la tupla corresponde
                 # al nombre del archivo en la colección
                 line_elems = line.split(' ')
                 html_file_name = line_elems[0]
                 alias = html_file_name.replace('.html', '')
+
+                if debug:
+                    print('Leyendo {}...'.format(html_file_name))
+
                 html_str = self.get_html_string(html_file_name)
                 # TODO manejar urls
                 url = line_elems[1]

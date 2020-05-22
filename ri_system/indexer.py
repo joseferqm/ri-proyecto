@@ -7,6 +7,9 @@ from ri_system.utilities import Utilities
 
 
 class Indexer:
+    def __init__(self, collection_handler):
+        self.__collection_handler = collection_handler
+
     def retrieve_html_str_terms(self, html_str, long, special, dash):
         tokens = self.apply_general_rules(html_str)
 
@@ -69,12 +72,11 @@ class Indexer:
 
         return terms
 
-    def process_collection(self, document_entries, collection_handler, debug):
-        collection_handler.create_tok_dir()
+    def process_collection(self, document_entries, debug):
+        self.__collection_handler.create_tok_dir()
         vocabulary = dict()
         collator = Collator()
 
-        # TODO: pruebas
         if debug:
             long_file_lines = list()
             special_file_lines = list()
@@ -82,10 +84,8 @@ class Indexer:
             terms_per_document_sum = 0
 
         for document_entry in document_entries:
-            print(document_entry.get_alias())
-
-            # TODO: pruebas
             if debug:
+                print('Procesando {}...'.format(document_entry.get_alias()))
                 long = list()
                 special = list()
                 dash = list()
@@ -116,7 +116,6 @@ class Indexer:
                 print(document_entry.get_alias())
                 tok_file_lines.append('\n')
 
-            # TODO: PRUEBAS
             if debug:
                 for long_elem in long:
                     line = '{:35} {}'.format(document_entry.get_alias(), long_elem)
@@ -130,7 +129,7 @@ class Indexer:
                     line = '{:35} {}'.format(document_entry.get_alias(), dash_elem)
                     dash_file_lines.append(line)
 
-            collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
+            self.__collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
 
         vocabulary_file_lines = list()
 
@@ -142,12 +141,13 @@ class Indexer:
             line = '{:30} {:12} {:20}'.format(term, str(doc_count), str(col_freq_count))
             vocabulary_file_lines.append(line)
 
-        collection_handler.create_vocabulary_file(vocabulary_file_lines)
+        self.__collection_handler.create_vocabulary_file(vocabulary_file_lines)
 
-        # TODO: PRUEBAS
         if debug:
+            Utilities.print_debug_header('Resultados de la indexación', True)
             print("La cantidad de palabras en el vocabulario es: ", len(vocabulary_file_lines))
-            print("La cantidad promedio de palabras por documento es de: ", terms_per_document_sum/len(document_entries), " palabras.")
+            print("La cantidad promedio de palabras por documento es de: ",
+                  terms_per_document_sum / len(document_entries), " palabras.")
             print("La cantidad de palabras en long es: ", len(long_file_lines))
             print("La cantidad de palabras en special es: ", len(special_file_lines))
             print("La cantidad de palabras en dash es: ", len(dash_file_lines))

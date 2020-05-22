@@ -4,7 +4,7 @@ import string
 import unicodedata
 
 import regex
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup
 
 
 class Utilities:
@@ -126,3 +126,15 @@ class Utilities:
         # If you only want the text part of a document, you can use the get_text() method.
         # It returns all the text in a document as a single Unicode string.
         return soup.get_text()
+
+    @staticmethod
+    def print_debug_header(text, space=False):
+        symbol = '#'
+        length = len(text)
+        header = '{}{}\n{} {}\n{}'.format(
+            '\n' if space else '',
+            symbol * (length + 2),
+            symbol, text,
+            symbol * (length + 2)
+        )
+        print(header)
