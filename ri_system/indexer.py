@@ -36,26 +36,31 @@ class Indexer:
                 if Utilities.has_only_allowed_chars(token):
                     # Caso del token que solo tiene caracteres permitidos
                     if '-' not in token:
-                        # Caso del token que no tiene guiones.
-                        # Puede tener solo letras, o dígitos y letras,
-                        # pero no tiene solo dígitos (porque el caso ya se controló).
-                        # Si es un término con dígitos y letras, y no empieza con a-z no numérico, se separan
-                        # grupos de dígitos y grupos de letras, y se ponen en la lista de tokens por procesar.
-                        # Si no, se trata de un término que:
-                        #   1) Tiene solo letras, o
-                        #   2) Tiene dígitos y letras, e inicia con a-z no numérico
-                        if token[0].isdigit():
-                            groups = Utilities.get_digits_or_letters_groups(token)
-                            for group in groups:
-                                tokens.append(group)
-                        else:
-                            # Se verifica si no es stop word
-                            if token not in stopwords.words('spanish'):
-                                # Regla de extraer términos de tamaño máximo 30
-                                if len(token) <= Utilities.max_term_length:
+                        # Regla de extraer términos de tamaño máximo 30
+                        if len(token) <= Utilities.max_term_length:
+                            # Caso del token que no tiene guiones.
+                            # Puede tener solo letras, o dígitos y letras,
+                            # pero no tiene solo dígitos (porque el caso ya se controló).
+                            # Si es un término con dígitos y letras, y no empieza con a-z no numérico, se separan
+                            # grupos de dígitos y grupos de letras, y se ponen en la lista de tokens por procesar.
+                            # Si no, se trata de un término que:
+                            #   1) Tiene solo letras, o
+                            #   2) Tiene dígitos y letras, e inicia con a-z no numérico
+                            if token[0].isdigit():
+                                groups = Utilities.get_digits_or_letters_groups(token)
+                                for group in groups:
+                                    tokens.append(group)
+                            else:
+                                # Se verifica si no es stop word
+                                if token not in stopwords.words('spanish'):
+                                    # # Regla de extraer términos de tamaño máximo 30
+                                    # if len(token) <= Utilities.max_term_length:
+                                    #     retrieved_terms.append(token)
+                                    # elif long is not None:
+                                    #     long.append(token)
                                     retrieved_terms.append(token)
-                                elif long is not None:
-                                    long.append(token)
+                        elif long is not None:
+                            long.append(token)
                     else:
                         # Caso del token que tiene guiones. Se verifica si es una excepción y si lo es se
                         # elimina el guion y se pone en la lista de términos.
