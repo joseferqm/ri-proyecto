@@ -44,8 +44,10 @@ class Indexer:
                         # Si no, se trata de un término que:
                         #   1) Tiene solo letras, o
                         #   2) Tiene dígitos y letras, e inicia con a-z no numérico
-                        if False:
-                            pass
+                        if token[0].isdigit():
+                            groups = Utilities.get_digits_or_letters_groups(token)
+                            for group in groups:
+                                tokens.append(group)
                         else:
                             # Se verifica si no es stop word
                             if token not in stopwords.words('spanish'):

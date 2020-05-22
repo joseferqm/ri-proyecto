@@ -26,6 +26,7 @@ class Utilities:
     additional_chars = ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ', '-']
     allowed_chars = string.digits + string.ascii_lowercase + ''.join(c for c in additional_chars)
     regex_allowed_chars = re.compile('[' + allowed_chars + ']')
+    regex_digits_or_letter_group = re.compile('(\d+|[a-z]+)')
 
     # Colección de prefijos para palabras con guion que son excepciones
     dash_exceptions = ['pre-', 'post-', 'pos-', 'sub-', 'ex-', 'anti-', 'pro-', 'súper-', 'super-', 'co-']
@@ -110,6 +111,10 @@ class Utilities:
             if not re.match(Utilities.regex_allowed_chars, char):
                 return False
         return True
+
+    @staticmethod
+    def get_digits_or_letters_groups(term):
+        return re.findall(Utilities.regex_digits_or_letter_group, term)
 
     @staticmethod
     def normalize_special_chars(original_str):
