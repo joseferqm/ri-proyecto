@@ -53,11 +53,6 @@ class Indexer:
                             else:
                                 # Se verifica si no es stop word
                                 if token not in stopwords.words('spanish'):
-                                    # # Regla de extraer términos de tamaño máximo 30
-                                    # if len(token) <= Utilities.max_term_length:
-                                    #     retrieved_terms.append(token)
-                                    # elif long is not None:
-                                    #     long.append(token)
                                     retrieved_terms.append(token)
                         elif long is not None:
                             long.append(token)
