@@ -122,7 +122,7 @@ class Indexer:
                     freq_ij = doc_vocabulary[term]  # freq_ij = la frecuencia del término k_i en el documento d_j
                     f_ij = freq_ij / max_l_freq_lj  # f_ij = la frecuencia normalizada del término k_i en el documento d_j.
                     # Se calcula como freq_ij divido por la frecuencia del término más frecuente en el documento d_j
-                    line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(f_ij))
+                    line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(round(f_ij, 3)))
                     tok_file_lines.append(line)
                     self.update_vocabulary_dict(vocabulary, term, freq_ij)
             else:
