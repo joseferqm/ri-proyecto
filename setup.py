@@ -14,3 +14,4 @@ setup(name="Proyecto_ParteII",
       executables={Executable("main.py", base=base)})
 
 # to run: 'python setup.py build'
+# to run again: delete file build and 'python setup.py build'
