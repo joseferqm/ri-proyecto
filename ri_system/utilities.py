@@ -27,6 +27,9 @@ class Utilities:
     allowed_chars = string.digits + string.ascii_lowercase + ''.join(c for c in additional_chars)
     regex_allowed_chars = re.compile('[' + allowed_chars + ']')
 
+    # Colección de prefijos para palabras con guion que son excepciones
+    dash_exceptions = ['pre-', 'post-', 'pos-', 'sub-', 'ex-', 'anti-', 'pro-', 'súper-', 'super-', 'co-']
+
     max_term_length = 30
     min_number = 0
     max_number = 10000
@@ -86,9 +89,7 @@ class Utilities:
 
     @staticmethod
     def is_dashed_word_exception(term):
-        # Colección de excepciones permitidas
-        exceptions = ["pre-", "post-", "pos-", "sub-", "vice-", "súper-"]
-        if any(x in term for x in exceptions):
+        if any(term.startswith(x) for x in Utilities.dash_exceptions):
             return True
         return False
 
@@ -122,7 +123,7 @@ class Utilities:
             html_str = html_str.replace('>', '> ')
 
         # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#beautifulsoup
-        soup = BeautifulSoup(html_str, "html.parser")
+        soup = BeautifulSoup(html_str, 'html.parser')
 
         return Utilities.get_text_from_html_str_1(soup)
         # return Utilities.get_text_from_html_str_2(soup)
