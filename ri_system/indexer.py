@@ -1,6 +1,7 @@
 import nltk
 import numpy as np
 from nltk.corpus import stopwords
+from pyuca import Collator
 
 from ri_system.utilities import Utilities
 
@@ -69,6 +70,7 @@ class Indexer:
     def process_collection(self, document_entries, collection_handler, report):
         collection_handler.create_tok_dir()
         vocabulary = dict()
+        collator = Collator()
 
         # TODO: pruebas
         long_file_lines = list()
@@ -93,12 +95,12 @@ class Indexer:
                 terms_per_document.append(len(document_terms))
                 # fin de prueba de promedio
                 document_terms_np_array = np.array(document_terms)
-                # El archivo tok debe estar ordenado alfabéticamente
-                # unique returns the sorted unique elements of an array
+
                 terms, counts = np.unique(document_terms_np_array, return_counts=True)
                 max_l_freq_lj = max(counts)
 
-                for term_ind, term in enumerate(terms):
+                # El archivo tok debe estar ordenado alfabéticamente
+                for term_ind, term in enumerate(sorted(terms, key=collator.sort_key)):
                     freq_ij = counts[term_ind]  # freq_ij = la frecuencia del término k_i en el documento d_j
                     f_ij = freq_ij / max_l_freq_lj  # f_ij = la frecuencia normalizada del término k_i en el documento d_j.
                     # Se calcula como freq_ij divido por la frecuencia del término más frecuente en el documento d_j
@@ -129,7 +131,8 @@ class Indexer:
         vocabulary_file_lines = list()
 
         # El archivo Vocabulario debe estar ordenado alfabéticamente
-        for term, values_tuple in sorted(vocabulary.items()):
+        for term in sorted(vocabulary.keys(), key=collator.sort_key):
+            values_tuple = vocabulary[term]
             doc_count = values_tuple[0]
             col_freq_count = values_tuple[1]
             line = '{:30} {:12} {:20}'.format(term, str(doc_count), str(col_freq_count))
