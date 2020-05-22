@@ -89,7 +89,7 @@ class Utilities:
 
     @staticmethod
     def is_dashed_word_exception(term):
-        if any(term.startswith(x) for x in Utilities.dash_exceptions):
+        if term.count('-') == 0 and any(term.startswith(x) for x in Utilities.dash_exceptions):
             return True
         return False
 
@@ -118,48 +118,11 @@ class Utilities:
 
     @staticmethod
     def get_text_from_html_str(html_str):
-
-        if True:
-            html_str = html_str.replace('>', '> ')
+        html_str = html_str.replace('>', '> ')
 
         # https://www.crummy.com/software/BeautifulSoup/bs4/doc/#beautifulsoup
         soup = BeautifulSoup(html_str, 'html.parser')
 
-        return Utilities.get_text_from_html_str_1(soup)
-        # return Utilities.get_text_from_html_str_2(soup)
-
-    @staticmethod
-    def get_text_from_html_str_1(soup):
         # If you only want the text part of a document, you can use the get_text() method.
         # It returns all the text in a document as a single Unicode string.
         return soup.get_text()
-
-    @staticmethod
-    def get_text_from_html_str_2(soup):
-        # Para que si en el html se encuentra
-        # <section id="nav_menu-2" class="nav_menu-2"><h2>SECCIONES</h2><div class="menu-secciones-container"><ul id="menu-secciones-1" class="menu"><li class="menu-item menu-item-type-taxonomy menu-item-object-category menu-item-350"><a title="Política" href="https://www.elindependiente.com/politica/">Política</a></li>
-        # se obtenga en la hilera resultante 'SECCIONES Política' (con los términos bien separados)
-        # y no solo 'SECCIONESPolítica' (con los términos sin separar)
-        tags_ignore = [
-            '[document]',
-            'noscript',
-            'header',
-            'html',
-            'meta',
-            'head',
-            'input',
-            'script',
-            'style',
-            'link',
-            'form'
-        ]
-
-        text_elems = list()
-        for t in soup.find_all(text=True):
-            if t.parent.name not in tags_ignore and not isinstance(t, Comment):
-                text_elems.append(t)
-
-        print(text_elems)
-        text = ' '.join(text_elem for text_elem in text_elems)
-
-        return text

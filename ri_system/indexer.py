@@ -46,6 +46,7 @@ class Indexer:
                         # sin modificar en la lista de términos.
                         # Si no lo es, se divide en el guion y se ponen ambas partes en la lista de tokens por procesar
                         if Utilities.is_dashed_word_exception(token):
+                            token = token.replace('-', '')
                             # Regla de extraer términos de tamaño máximo 30
                             if len(token) <= Utilities.max_term_length:
                                 terms.append(token)
@@ -67,33 +68,36 @@ class Indexer:
 
         return terms
 
-    def process_collection(self, document_entries, collection_handler, report):
+    def process_collection(self, document_entries, collection_handler, debug):
         collection_handler.create_tok_dir()
         vocabulary = dict()
         collator = Collator()
 
         # TODO: pruebas
-        long_file_lines = list()
-        special_file_lines = list()
-        dash_file_lines = list()
-        terms_per_document = list()
+        if debug:
+            long_file_lines = list()
+            special_file_lines = list()
+            dash_file_lines = list()
+            terms_per_document_sum = 0
 
         for document_entry in document_entries:
             print(document_entry.get_alias())
 
             # TODO: pruebas
-            long = list()
-            special = list()
-            dash = list()
+            if debug:
+                long = list()
+                special = list()
+                dash = list()
 
             document_html_str = document_entry.get_html_str()
             document_terms = self.retrieve_html_str_terms(document_html_str, long, special, dash)
             tok_file_lines = list()
 
             if len(document_terms) > 0:
-                # prueba de promedio
-                terms_per_document.append(len(document_terms))
-                # fin de prueba de promedio
+                if debug:
+                    # prueba de promedio
+                    terms_per_document_sum += len(document_terms)
+
                 document_terms_np_array = np.array(document_terms)
 
                 terms, counts = np.unique(document_terms_np_array, return_counts=True)
@@ -112,19 +116,18 @@ class Indexer:
                 tok_file_lines.append('\n')
 
             # TODO: PRUEBAS
-            for long_elem in long:
-                line = '{:35} {}'.format(document_entry.get_alias(), long_elem)
-                long_file_lines.append(line)
+            if debug:
+                for long_elem in long:
+                    line = '{:35} {}'.format(document_entry.get_alias(), long_elem)
+                    long_file_lines.append(line)
+    
+                for special_elem in special:
+                    line = '{:35} {}'.format(document_entry.get_alias(), special_elem)
+                    special_file_lines.append(line)
 
-            # TODO: PRUEBAS
-            for special_elem in special:
-                line = '{:35} {}'.format(document_entry.get_alias(), special_elem)
-                special_file_lines.append(line)
-
-            # TODO: PRUEBAS
-            for dash_elem in dash:
-                line = '{:35} {}'.format(document_entry.get_alias(), dash_elem)
-                dash_file_lines.append(line)
+                for dash_elem in dash:
+                    line = '{:35} {}'.format(document_entry.get_alias(), dash_elem)
+                    dash_file_lines.append(line)
 
             collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
 
@@ -140,23 +143,22 @@ class Indexer:
 
         collection_handler.create_vocabulary_file(vocabulary_file_lines)
 
-        print("La cantidad de palabras en el vocabulario es: ", len(vocabulary_file_lines))
-        mean = 0
-        for terms in terms_per_document:
-            mean += terms
-        print("La cantidad promedio de palabras por documento es de: ", mean/600, " palabras.")
-
         # TODO: PRUEBAS
-        long_file_str = '\n'.join(line for line in long_file_lines)
-        Utilities.create_and_save_file('long.txt', long_file_str)
+        if debug:
+            print("La cantidad de palabras en el vocabulario es: ", len(vocabulary_file_lines))
+            print("La cantidad promedio de palabras por documento es de: ", terms_per_document_sum/len(document_entries), " palabras.")
+            print("La cantidad de palabras en long es: ", len(long_file_lines))
+            print("La cantidad de palabras en special es: ", len(special_file_lines))
+            print("La cantidad de palabras en dash es: ", len(dash_file_lines))
 
-        # TODO: PRUEBAS
-        special_file_str = '\n'.join(line for line in special_file_lines)
-        Utilities.create_and_save_file('special.txt', special_file_str)
+            long_file_str = '\n'.join(line for line in long_file_lines)
+            Utilities.create_and_save_file('long.txt', long_file_str)
 
-        # TODO: PRUEBAS
-        dash_file_str = '\n'.join(line for line in dash_file_lines)
-        Utilities.create_and_save_file('dash.txt', dash_file_str)
+            special_file_str = '\n'.join(line for line in special_file_lines)
+            Utilities.create_and_save_file('special.txt', special_file_str)
+
+            dash_file_str = '\n'.join(line for line in dash_file_lines)
+            Utilities.create_and_save_file('dash.txt', dash_file_str)
 
     @staticmethod
     def apply_general_rules(html_str):
