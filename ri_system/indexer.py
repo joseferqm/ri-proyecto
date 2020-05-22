@@ -114,11 +114,12 @@ class Indexer:
                 document_terms_np_array = np.array(document_terms)
 
                 terms, counts = np.unique(document_terms_np_array, return_counts=True)
+                doc_vocabulary = dict(zip(terms, counts))
                 max_l_freq_lj = max(counts)
 
                 # El archivo tok debe estar ordenado alfabéticamente
-                for term_ind, term in enumerate(sorted(terms, key=collator.sort_key)):
-                    freq_ij = counts[term_ind]  # freq_ij = la frecuencia del término k_i en el documento d_j
+                for term in sorted(doc_vocabulary.keys(), key=collator.sort_key):
+                    freq_ij = doc_vocabulary[term]  # freq_ij = la frecuencia del término k_i en el documento d_j
                     f_ij = freq_ij / max_l_freq_lj  # f_ij = la frecuencia normalizada del término k_i en el documento d_j.
                     # Se calcula como freq_ij divido por la frecuencia del término más frecuente en el documento d_j
                     line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(f_ij))
