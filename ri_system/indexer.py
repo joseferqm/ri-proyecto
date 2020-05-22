@@ -13,7 +13,7 @@ class Indexer:
     def retrieve_html_str_terms(self, html_str, long, special, dash):
         tokens = self.apply_general_rules(html_str)
 
-        terms = list()
+        retrieved_terms = list()
 
         while tokens:
             token = tokens.pop()
@@ -31,7 +31,7 @@ class Indexer:
                 # caracteres de puntuación y porque rango inicia en 0
                 number = int(token)
                 if Utilities.in_range(number):
-                    terms.append(str(number))
+                    retrieved_terms.append(str(number))
             else:
                 if Utilities.has_only_allowed_chars(token):
                     # Caso del token que solo tiene caracteres permitidos
@@ -42,7 +42,7 @@ class Indexer:
                         if token not in stopwords.words('spanish'):
                             # Regla de extraer términos de tamaño máximo 30
                             if len(token) <= Utilities.max_term_length:
-                                terms.append(token)
+                                retrieved_terms.append(token)
                             else:
                                 long.append(token)
                     else:
@@ -53,7 +53,7 @@ class Indexer:
                             token = token.replace('-', '')
                             # Regla de extraer términos de tamaño máximo 30
                             if len(token) <= Utilities.max_term_length:
-                                terms.append(token)
+                                retrieved_terms.append(token)
                             else:
                                 long.append(token)
                         else:
@@ -70,7 +70,7 @@ class Indexer:
                     else:
                         special.append('{:50} {}'.format(token, token.encode('utf-8')))
 
-        return terms
+        return retrieved_terms
 
     def process_collection(self, document_entries, debug):
         self.__collection_handler.create_tok_dir()
