@@ -37,18 +37,26 @@ class Indexer:
                     # Caso del token que solo tiene caracteres permitidos
                     if '-' not in token:
                         # TODO regla 7
-                        # Caso del token que no tiene guiones. Se verifica si no es stop word
-                        # y se pone en la lista de términos
-                        if token not in stopwords.words('spanish'):
-                            # Regla de extraer términos de tamaño máximo 30
-                            if len(token) <= Utilities.max_term_length:
-                                retrieved_terms.append(token)
-                            else:
-                                long.append(token)
+                        # Caso del token que no tiene guiones.
+                        # Si es un término con dígitos y letras, y no empieza con a-z no numérico, se separan
+                        # grupos de dígitos y grupos de letras, y se ponen en la lista de tokens por procesar.
+                        # Si no, se trata de un término que:
+                        #   1) Tiene solo letras, o
+                        #   2) Tiene dígitos y letras, e inicia con a-z no numérico
+                        if False:
+                            pass
+                        else:
+                            # Se verifica si no es stop word
+                            if token not in stopwords.words('spanish'):
+                                # Regla de extraer términos de tamaño máximo 30
+                                if len(token) <= Utilities.max_term_length:
+                                    retrieved_terms.append(token)
+                                else:
+                                    long.append(token)
                     else:
-                        # Caso del token que tiene guiones. Se verifica si es una excepción y si lo es se pone
-                        # sin modificar en la lista de términos.
-                        # Si no lo es, se divide en el guion y se ponen ambas partes en la lista de tokens por procesar
+                        # Caso del token que tiene guiones. Se verifica si es una excepción y si lo es se
+                        # elimina el guion y se pone en la lista de términos.
+                        # Si no lo es, se divide en el guion y se ponen las partes en la lista de tokens por procesar
                         if Utilities.is_dashed_word_exception(token):
                             token = token.replace('-', '')
                             # Regla de extraer términos de tamaño máximo 30
