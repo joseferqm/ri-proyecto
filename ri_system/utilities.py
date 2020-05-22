@@ -89,7 +89,7 @@ class Utilities:
 
     @staticmethod
     def is_dashed_word_exception(term):
-        if term.count('-') == 0 and any(term.startswith(x) for x in Utilities.dash_exceptions):
+        if term.count('-') == 1 and any(term.startswith(x) for x in Utilities.dash_exceptions):
             return True
         return False
 
