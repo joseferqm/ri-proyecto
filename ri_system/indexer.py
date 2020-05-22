@@ -33,6 +33,7 @@ class Indexer:
                 if Utilities.has_only_allowed_chars(token):
                     # Caso del token que solo tiene caracteres permitidos
                     if '-' not in token:
+                        # TODO regla 7
                         # Caso del token que no tiene guiones. Se verifica si no es stop word
                         # y se pone en la lista de términos
                         if token not in stopwords.words('spanish'):
@@ -120,7 +121,7 @@ class Indexer:
                 for long_elem in long:
                     line = '{:35} {}'.format(document_entry.get_alias(), long_elem)
                     long_file_lines.append(line)
-    
+
                 for special_elem in special:
                     line = '{:35} {}'.format(document_entry.get_alias(), special_elem)
                     special_file_lines.append(line)
