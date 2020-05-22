@@ -10,7 +10,7 @@ class Indexer:
     def __init__(self, collection_handler):
         self.__collection_handler = collection_handler
 
-    def retrieve_html_str_terms(self, html_str, long, special, dash):
+    def retrieve_html_str_terms(self, html_str, long=None, special=None, dash=None):
         tokens = self.apply_general_rules(html_str)
 
         retrieved_terms = list()
@@ -36,8 +36,9 @@ class Indexer:
                 if Utilities.has_only_allowed_chars(token):
                     # Caso del token que solo tiene caracteres permitidos
                     if '-' not in token:
-                        # TODO regla 7
                         # Caso del token que no tiene guiones.
+                        # Puede tener solo letras, o dígitos y letras,
+                        # pero no tiene solo dígitos (porque el caso ya se controló).
                         # Si es un término con dígitos y letras, y no empieza con a-z no numérico, se separan
                         # grupos de dígitos y grupos de letras, y se ponen en la lista de tokens por procesar.
                         # Si no, se trata de un término que:
@@ -51,7 +52,7 @@ class Indexer:
                                 # Regla de extraer términos de tamaño máximo 30
                                 if len(token) <= Utilities.max_term_length:
                                     retrieved_terms.append(token)
-                                else:
+                                elif long is not None:
                                     long.append(token)
                     else:
                         # Caso del token que tiene guiones. Se verifica si es una excepción y si lo es se
@@ -62,10 +63,12 @@ class Indexer:
                             # Regla de extraer términos de tamaño máximo 30
                             if len(token) <= Utilities.max_term_length:
                                 retrieved_terms.append(token)
-                            else:
+                            elif long is not None:
                                 long.append(token)
                         else:
-                            dash.append(token)
+                            if dash is not None:
+                                dash.append(token)
+
                             sub_tokens = token.split('-')
                             for sub_token in sub_tokens:
                                 tokens.append(sub_token)
@@ -75,7 +78,7 @@ class Indexer:
                     norm_token = Utilities.normalize_special_chars(token)
                     if Utilities.has_only_allowed_chars(norm_token):
                         tokens.append(norm_token)
-                    else:
+                    elif special is not None:
                         special.append('{:50} {}'.format(token, token.encode('utf-8')))
 
         return retrieved_terms
@@ -92,15 +95,16 @@ class Indexer:
             terms_per_document_sum = 0
 
         for document_entry in document_entries:
+            document_html_str = document_entry.get_html_str()
+            tok_file_lines = list()
             if debug:
                 print('Procesando {}...'.format(document_entry.get_alias()))
                 long = list()
                 special = list()
                 dash = list()
-
-            document_html_str = document_entry.get_html_str()
-            document_terms = self.retrieve_html_str_terms(document_html_str, long, special, dash)
-            tok_file_lines = list()
+                document_terms = self.retrieve_html_str_terms(document_html_str, long, special, dash)
+            else:
+                document_terms = self.retrieve_html_str_terms(document_html_str)
 
             if len(document_terms) > 0:
                 if debug:
@@ -121,7 +125,6 @@ class Indexer:
                     tok_file_lines.append(line)
                     self.update_vocabulary_dict(vocabulary, term, freq_ij)
             else:
-                print(document_entry.get_alias())
                 tok_file_lines.append('\n')
 
             if debug:
