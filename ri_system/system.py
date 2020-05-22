@@ -21,7 +21,7 @@ class System:
         self.__document_entries = self.__collection_handler.get_html_strings_and_urls_stream()
 
     def index_collection(self):
-        self.__indexer.process_collection(self.__document_entries, self.__collection_handler)
+        self.__indexer.process_collection(self.__document_entries, self.__collection_handler, True)
 
     ########################
     # Funciones para pruebas

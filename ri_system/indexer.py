@@ -66,7 +66,7 @@ class Indexer:
 
         return terms
 
-    def process_collection(self, document_entries, collection_handler):
+    def process_collection(self, document_entries, collection_handler, report):
         collection_handler.create_tok_dir()
         vocabulary = dict()
 
@@ -74,6 +74,7 @@ class Indexer:
         long_file_lines = list()
         special_file_lines = list()
         dash_file_lines = list()
+        terms_per_document = list()
 
         for document_entry in document_entries:
             print(document_entry.get_alias())
@@ -88,6 +89,9 @@ class Indexer:
             tok_file_lines = list()
 
             if len(document_terms) > 0:
+                # prueba de promedio
+                terms_per_document.append(len(document_terms))
+                # fin de prueba de promedio
                 document_terms_np_array = np.array(document_terms)
                 # El archivo tok debe estar ordenado alfabéticamente
                 # unique returns the sorted unique elements of an array
@@ -132,6 +136,12 @@ class Indexer:
             vocabulary_file_lines.append(line)
 
         collection_handler.create_vocabulary_file(vocabulary_file_lines)
+
+        print("La cantidad de palabras en el vocabulario es: ", len(vocabulary_file_lines))
+        mean = 0
+        for terms in terms_per_document:
+            mean += terms
+        print("La cantidad promedio de palabras por documento es de: ", mean/600, " palabras.")
 
         # TODO: PRUEBAS
         long_file_str = '\n'.join(line for line in long_file_lines)
