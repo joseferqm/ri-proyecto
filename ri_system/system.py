@@ -2,10 +2,18 @@ from ri_system.collection_handler import CollectionHandler
 from ri_system.indexer import Indexer
 from ri_system.utilities import Utilities
 
+import tkinter
+from tkinter import filedialog
+import os
+
 
 class System:
     def __init__(self, debug):
-        main_dir = 'RI_Coleccion'
+
+        root = tkinter.Tk()
+        root.withdraw()
+
+        main_dir = self.search_for_file_path(root)
         urls_file_name = 'URLS.txt'
         vocabulary_file_name = 'Vocabulario'
         html_files_dir = 'Coleccion'
@@ -33,3 +41,10 @@ class System:
             Utilities.print_debug_header('Indexando la colección', True)
 
         self.__indexer.process_collection(self.__document_entries, self.__debug)
+
+    def search_for_file_path(self, root):
+        currdir = os.getcwd()
+        tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+        if len(tempdir) > 0:
+            print("You chose: %s" % tempdir)
+        return tempdir

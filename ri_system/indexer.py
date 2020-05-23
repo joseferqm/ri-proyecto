@@ -1,8 +1,10 @@
 import numpy as np
 from pyuca import Collator
 
+
 from ri_system.analyzer import Analyzer
 from ri_system.utilities import Utilities
+import os
 
 
 class Indexer:
