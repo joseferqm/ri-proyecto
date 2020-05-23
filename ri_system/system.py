@@ -3,7 +3,7 @@ from ri_system.indexer import Indexer
 from ri_system.utilities import Utilities
 
 import tkinter
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 import os
 
 
@@ -41,6 +41,7 @@ class System:
             Utilities.print_debug_header('Indexando la colección', True)
 
         self.__indexer.process_collection(self.__document_entries, self.__debug)
+        messagebox.showinfo(message="main.exe: ejecución completada.", title="Información")
 
     def search_for_file_path(self, root):
         currdir = os.getcwd()
