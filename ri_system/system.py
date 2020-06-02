@@ -45,7 +45,7 @@ class System:
 
     def search_for_file_path(self, root):
         currdir = os.getcwd()
-        tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+        tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, title='Por favor seleccione un directorio')
         if len(tempdir) > 0:
             print("You chose: %s" % tempdir)
         return tempdir
