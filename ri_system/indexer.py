@@ -1,10 +1,10 @@
 import numpy as np
 from pyuca import Collator
+import math
 
 
 from ri_system.analyzer import Analyzer
 from ri_system.utilities import Utilities
-import os
 
 
 class Indexer:
@@ -13,6 +13,7 @@ class Indexer:
 
     def process_collection(self, document_entries, debug):
         self.__collection_handler.create_tok_dir()
+        self.__collection_handler.create_weights_dir()
         vocabulary = dict()
         collator = Collator()
 
@@ -77,8 +78,8 @@ class Indexer:
         for term in sorted(vocabulary.keys(), key=collator.sort_key):
             values_tuple = vocabulary[term]
             doc_count = values_tuple[0]
-            col_freq_count = values_tuple[1]
-            line = '{:30} {:12} {:20}'.format(term, str(doc_count), str(col_freq_count))
+            idf = round(math.log10(len(document_entries) / doc_count), 3)
+            line = '{:30} {:12} {:20}'.format(term, str(doc_count), str(idf))
             vocabulary_file_lines.append(line)
 
         self.__collection_handler.create_vocabulary_file(vocabulary_file_lines)

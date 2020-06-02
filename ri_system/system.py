@@ -18,9 +18,10 @@ class System:
         vocabulary_file_name = 'Vocabulario'
         html_files_dir = 'Coleccion'
         tok_files_dir = 'Coleccion_tok'
+        weights_files_dir = 'Coleccion_weights'
 
         self.__collection_handler = CollectionHandler(main_dir, urls_file_name, vocabulary_file_name,
-                                                      html_files_dir, tok_files_dir)
+                                                      html_files_dir, tok_files_dir, weights_files_dir)
         self.__indexer: Indexer = Indexer(self.__collection_handler)
 
         self.__document_entries = None
