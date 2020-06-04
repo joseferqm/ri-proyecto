@@ -15,13 +15,15 @@ class System:
 
         main_dir = self.search_for_file_path(root)
         urls_file_name = 'URLS.txt'
-        vocabulary_file_name = 'Vocabulario'
+        vocabulary_file_name = 'Vocabulario.txt'
+        index_file_name = 'Indice.txt'
+        postings_file_name = 'Postings.txt'
         html_files_dir = 'Coleccion'
         tok_files_dir = 'Coleccion_tok'
-        weights_files_dir = 'Coleccion_weights'
+        wtd_files_dir = 'Coleccion_wtd'
 
         self.__collection_handler = CollectionHandler(main_dir, urls_file_name, vocabulary_file_name,
-                                                      html_files_dir, tok_files_dir, weights_files_dir)
+                                                      html_files_dir, tok_files_dir, wtd_files_dir, index_file_name, postings_file_name)
         self.__indexer: Indexer = Indexer(self.__collection_handler)
 
         self.__document_entries = None
