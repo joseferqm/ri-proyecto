@@ -1,10 +1,10 @@
+import os
+import tkinter
+from tkinter import filedialog, messagebox
+
 from ri_system.collection_handler import CollectionHandler
 from ri_system.indexer import Indexer
 from ri_system.utilities import Utilities
-
-import tkinter
-from tkinter import filedialog, messagebox
-import os
 
 
 class System:
@@ -22,8 +22,10 @@ class System:
         tok_files_dir = 'Coleccion_tok'
         wtd_files_dir = 'Coleccion_wtd'
 
-        self.__collection_handler = CollectionHandler(main_dir, urls_file_name, vocabulary_file_name,
-                                                      html_files_dir, tok_files_dir, wtd_files_dir, index_file_name, postings_file_name)
+        self.__collection_handler = CollectionHandler()
+        self.__collection_handler.set_inputs_names(main_dir, urls_file_name, html_files_dir)
+        self.__collection_handler.set_outputs_names(tok_files_dir, wtd_files_dir, vocabulary_file_name, index_file_name,
+                                                    postings_file_name)
         self.__indexer: Indexer = Indexer(self.__collection_handler)
 
         self.__document_entries = None

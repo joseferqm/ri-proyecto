@@ -99,7 +99,7 @@ class Indexer:
         for document_alias, document_terms in documents.items():
             wtd_file_lines = list()
             for term, f_ij in document_terms.items():
-                weight = f_ij * vocabulary[term][2]
+                weight = round(f_ij * vocabulary[term][2], 3)
                 line = '{:30} {:20}'.format(term, str(weight))
                 wtd_file_lines.append(line)
                 line = '{:30} {:30} {:20}'.format(term, document_alias, str(weight))

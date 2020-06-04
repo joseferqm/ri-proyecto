@@ -6,14 +6,26 @@ from ri_system.utilities import Utilities
 
 
 class CollectionHandler:
-    def __init__(self, main_dir, urls_file_name, vocabulary_file_name, html_files_dir, tok_files_dir, wtd_files_dir,
-                 index_file_name, postings_file_name):
+    def __init__(self):
+        self.__main_dir = None
+        self.__html_files_dir = None
+        self.__urls_file_name = None
+        self.__tok_files_dir = None
+        self.__wtd_files_dir = None
+        self.__vocabulary_file_name = None
+        self.__index_file_name = None
+        self.__postings_file_name = None
+
+    def set_inputs_names(self, main_dir, urls_file_name, html_files_dir):
         self.__main_dir = main_dir
-        self.__urls_file_name = urls_file_name
-        self.__vocabulary_file_name = vocabulary_file_name
         self.__html_files_dir = html_files_dir
+        self.__urls_file_name = urls_file_name
+
+    def set_outputs_names(self, tok_files_dir, wtd_files_dir, vocabulary_file_name, index_file_name,
+                          postings_file_name):
         self.__tok_files_dir = tok_files_dir
         self.__wtd_files_dir = wtd_files_dir
+        self.__vocabulary_file_name = vocabulary_file_name
         self.__index_file_name = index_file_name
         self.__postings_file_name = postings_file_name
 
