@@ -84,7 +84,7 @@ class Indexer:
         for term in sorted(vocabulary.keys(), key=collator.sort_key):
             values_tuple = vocabulary[term]
             n_i = values_tuple[0]
-            idf = round(math.log10(len(document_entries) / n_i), 3)
+            idf = Utilities.get_inverse_term_frequency(len(document_entries), n_i)
             vocabulary[term] = (vocabulary[term][0], vocabulary[term][1], idf)
             line = '{:30} {:12} {:20}'.format(term, str(n_i), str(idf))
             vocabulary_file_lines.append(line)
@@ -92,21 +92,31 @@ class Indexer:
         self.__collection_handler.create_file_for_collection(vocabulary_file_lines, CollectionOutputFiles.VOCABULARY)
 
         # Archivos Indice y Postings
-        current_postings_line = 1
         postings_file_lines = list()
         index_file_lines = list()
+        postings_file_vocabulary = dict()
         index_file_vocabulary = dict()
         for document_alias, document_terms in documents.items():
             wtd_file_lines = list()
             for term, f_ij in document_terms.items():
-                weight = round(f_ij * vocabulary[term][2], 3)
+                weight = Utilities.get_term_weight(f_ij, vocabulary[term][2])
                 line = '{:30} {:20}'.format(term, str(weight))
                 wtd_file_lines.append(line)
-                line = '{:30} {:30} {:20}'.format(term, document_alias, str(weight))
-                postings_file_lines.append(line)
-                Indexer.update_index_dict(index_file_vocabulary, term, current_postings_line)
-                current_postings_line += 1
+                Indexer.update_postings_dict(postings_file_vocabulary, term, document_alias, weight)
+                Indexer.update_index_dict(index_file_vocabulary, term)
             self.__collection_handler.create_file_for_document(document_alias, wtd_file_lines, DocumentOutputFiles.WTD)
+
+        current_postings_line = 0
+        for term in sorted(postings_file_vocabulary.keys(), key=collator.sort_key):
+            documents_list = postings_file_vocabulary[term]
+            for values_tuple in documents_list:
+                document_alias = values_tuple[0]
+                term_weight = values_tuple[1]
+                if index_file_vocabulary[term][1] is None:
+                    index_file_vocabulary[term] = (index_file_vocabulary[term][0], current_postings_line)
+                line = '{:30} {:30} {:20}'.format(term, document_alias, str(term_weight))
+                postings_file_lines.append(line)
+                current_postings_line += 1
 
         for term in sorted(index_file_vocabulary.keys(), key=collator.sort_key):
             values_tuple = index_file_vocabulary[term]
@@ -144,8 +154,14 @@ class Indexer:
             vocabulary[term] = (1, count, None)
 
     @staticmethod
-    def update_index_dict(vocabulary, term, current_postings_line):
+    def update_postings_dict(vocabulary, term, document_alias, weight):
+        if term not in vocabulary.keys():
+            vocabulary[term] = list()
+        vocabulary[term].append((document_alias, weight))
+
+    @staticmethod
+    def update_index_dict(vocabulary, term):
         if term in vocabulary.keys():
             vocabulary[term] = (vocabulary[term][0] + 1, vocabulary[term][1])
         else:
-            vocabulary[term] = (1, current_postings_line)
+            vocabulary[term] = (1, None)
