@@ -5,13 +5,15 @@ from ri_system.utilities import Utilities
 
 
 class CollectionHandler:
-    def __init__(self, main_dir, urls_file_name, vocabulary_file_name, html_files_dir, tok_files_dir, weights_files_dir):
+    def __init__(self, main_dir, urls_file_name, vocabulary_file_name, html_files_dir,
+                 tok_files_dir, weights_files_dir, postings_file_name):
         self.__main_dir = main_dir
         self.__urls_file_name = urls_file_name
         self.__vocabulary_file_name = vocabulary_file_name
         self.__html_files_dir = html_files_dir
         self.__tok_files_dir = tok_files_dir
         self.__weights_files_dir = weights_files_dir
+        self.__postings_file_name = postings_file_name
 
     def get_html_strings_and_urls_stream(self, debug):
         document_entries = list()
@@ -81,6 +83,9 @@ class CollectionHandler:
         if not os.path.isdir('{}/{}'.format(self.__main_dir, self.__tok_files_dir)):
             os.mkdir('{}/{}'.format(self.__main_dir, self.__tok_files_dir))
 
+    def get_tok_dir(self):
+        return '{}/{}'.format(self.__main_dir, self.__tok_files_dir)
+
     def create_weights_dir(self):
         if not os.path.isdir('{}/{}'.format(self.__main_dir, self.__weights_files_dir)):
             os.mkdir('{}/{}'.format(self.__main_dir, self.__weights_files_dir))
@@ -89,3 +94,11 @@ class CollectionHandler:
         weights_file_path = '{}/{}/{}.wtd'.format(self.__main_dir, self.__weights_files_dir, document_entry_alias)
         weights_file_str = '\n'.join(line for line in lines)
         Utilities.create_and_save_file(weights_file_path, weights_file_str)
+
+    def get_weights_dir(self):
+        return '{}/{}'.format(self.__main_dir, self.__weights_files_dir)
+
+    def create_postings_file(self, lines):
+        postings_file_path = '{}/{}'.format(self.__main_dir, self.__postings_file_name)
+        postings_file_str = '\n'.join(line for line in lines)
+        Utilities.create_and_save_file(postings_file_path, postings_file_str)

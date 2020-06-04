@@ -1,6 +1,9 @@
 import numpy as np
 from pyuca import Collator
 import math
+import glob
+import errno
+import os
 
 
 from ri_system.analyzer import Analyzer
@@ -48,11 +51,11 @@ class Indexer:
 
                 # El archivo tok debe estar ordenado alfabéticamente
                 for term in sorted(doc_vocabulary.keys(), key=collator.sort_key):
-                    freq_ij = doc_vocabulary[term]  # freq_ij = la frecuencia del término k_i en el documento d_j
-                    f_ij = freq_ij / max_l_freq_lj  # f_ij = la frecuencia normalizada del término k_i en el documento d_j.
+                    freq_ij = doc_vocabulary[term] # freq_ij = frecuencia del término k_i en el documento d_j
+                    f_ij = freq_ij / max_l_freq_lj # f_ij = frecuencia normalizada del término k_i en el documento d_j
                     # Se calcula como freq_ij divido por la frecuencia del término más frecuente en el documento d_j
-                    line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(round(f_ij, 3)))
-                    tok_file_lines.append(line)
+                    tok_line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(round(f_ij, 3)))
+                    tok_file_lines.append(tok_line)
                     self.update_vocabulary_dict(vocabulary, term, freq_ij)
             else:
                 tok_file_lines.append('\n')
@@ -72,6 +75,7 @@ class Indexer:
 
             self.__collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
 
+        postings_file_lines = list()
         vocabulary_file_lines = list()
 
         # El archivo Vocabulario debe estar ordenado alfabéticamente
@@ -79,9 +83,35 @@ class Indexer:
             values_tuple = vocabulary[term]
             doc_count = values_tuple[0]
             idf = round(math.log10(len(document_entries) / doc_count), 3)
-            line = '{:30} {:12} {:20}'.format(term, str(doc_count), str(idf))
-            vocabulary_file_lines.append(line)
+            vocabulary_line = '{:30} {:12} {:20}'.format(term, str(doc_count), str(idf))
+            vocabulary_file_lines.append(vocabulary_line)
 
+        files = glob.glob(self.__collection_handler.get_tok_dir()+'/*')
+        for name in files:
+            try:
+                with open(name, encoding='utf-8') as f:
+                    temporal_tok_lines = f.readlines()
+                    weights_file_lines = list()
+                    for temporal_tok_line in temporal_tok_lines:
+                        wtd_term = temporal_tok_line.split("\\s").pop(0)[:30].replace(' ', '').replace('\n', '')
+                        if wtd_term == '':
+                            continue
+                        tok_f_ij = temporal_tok_line.split("\\s").pop(0)[44:].replace(' ', '').replace('\n', '')
+                        values_tuple = vocabulary[wtd_term]
+                        doc_count = values_tuple[0]
+                        idf = round(math.log10(len(document_entries) / doc_count), 3)
+                        weight = float(tok_f_ij) * idf
+                        weights_line = '{:30} {:20}'.format(wtd_term, str(round(weight, 3)))
+                        weights_file_lines.append(weights_line)
+                        posting_line = '{:30} {:30} {:20}'.format(wtd_term, os.path.basename(f.name.replace('.tok', '.html')), str(round(weight, 3)))
+                        postings_file_lines.append(posting_line)
+                    self.__collection_handler.create_weights_file(os.path.basename(f.name.replace('.tok', '')),
+                                                                  weights_file_lines)
+            except IOError as exc:
+                if exc.errno != errno.EISDIR:
+                    raise
+
+        self.__collection_handler.create_postings_file(postings_file_lines)
         self.__collection_handler.create_vocabulary_file(vocabulary_file_lines)
 
         if debug:
