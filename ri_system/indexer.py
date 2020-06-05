@@ -50,11 +50,11 @@ class Indexer:
 
                 # El archivo tok debe estar ordenado alfabéticamente
                 for term in sorted(doc_vocabulary.keys(), key=collator.sort_key):
-                    freq_ij = doc_vocabulary[term]  # freq_ij = la frecuencia del término k_i en el documento d_j
-                    f_ij = freq_ij / max_l_freq_lj  # f_ij = la frecuencia normalizada del término k_i en el documento d_j.
+                    freq_ij = doc_vocabulary[term] # freq_ij = frecuencia del término k_i en el documento d_j
+                    f_ij = freq_ij / max_l_freq_lj # f_ij = frecuencia normalizada del término k_i en el documento d_j
                     # Se calcula como freq_ij divido por la frecuencia del término más frecuente en el documento d_j
-                    line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(round(f_ij, 3)))
-                    tok_file_lines.append(line)
+                    tok_line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(round(f_ij, 3)))
+                    tok_file_lines.append(tok_line)
                     self.update_vocabulary_dict(vocabulary, term, freq_ij)
                     documents[document_alias][term] = round(f_ij, 3)
             else:
@@ -112,7 +112,7 @@ class Indexer:
                 term_weight = values_tuple[1]
                 if index_file_vocabulary[term][1] is None:
                     index_file_vocabulary[term] = (index_file_vocabulary[term][0], current_postings_line)
-                line = '{:30} {:35} {:20}'.format(term, document_alias+'.html', str(term_weight))
+                line = '{:30} {:40} {:20}'.format(term, document_alias+'.html', str(term_weight))
                 postings_file_lines.append(line)
                 current_postings_line += 1
 
