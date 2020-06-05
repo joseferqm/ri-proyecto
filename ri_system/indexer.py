@@ -106,16 +106,15 @@ class Indexer:
 
         current_postings_line = 0
         for term in sorted(postings_file_vocabulary.keys(), key=collator.sort_key):
-            term_dict = postings_file_vocabulary[term]
-            for weight, documents in sorted(term_dict.items(), reverse=True):
-                for document in documents:
-                    line = '{:30} {:30} {:20}'.format(term, document + '.html', str(weight))
-                    postings_file_lines.append(line)
-
-                    if index_file_vocabulary[term][1] is None:
-                        index_file_vocabulary[term] = (index_file_vocabulary[term][0], current_postings_line)
-
-                    current_postings_line += 1
+            documents_list = postings_file_vocabulary[term]
+            for values_tuple in documents_list:
+                document_alias = values_tuple[0]
+                term_weight = values_tuple[1]
+                if index_file_vocabulary[term][1] is None:
+                    index_file_vocabulary[term] = (index_file_vocabulary[term][0], current_postings_line)
+                line = '{:30} {:35} {:20}'.format(term, document_alias+'.html', str(term_weight))
+                postings_file_lines.append(line)
+                current_postings_line += 1
 
         for term in sorted(index_file_vocabulary.keys(), key=collator.sort_key):
             values_tuple = index_file_vocabulary[term]
@@ -155,12 +154,8 @@ class Indexer:
     @staticmethod
     def update_postings_dict(vocabulary, term, document_alias, weight):
         if term not in vocabulary.keys():
-            vocabulary[term] = dict()
-
-        if weight not in vocabulary[term].keys():
-            vocabulary[term][weight] = list()
-
-        vocabulary[term][weight].append(document_alias)
+            vocabulary[term] = list()
+        vocabulary[term].append((document_alias, weight))
 
     @staticmethod
     def update_index_dict(vocabulary, term):

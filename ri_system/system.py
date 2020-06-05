@@ -1,6 +1,7 @@
 import os
 import tkinter
 from tkinter import filedialog, messagebox
+import time
 
 from ri_system.collection_handler import CollectionHandler
 from ri_system.indexer import Indexer
@@ -31,12 +32,15 @@ class System:
         self.__document_entries = None
 
         self.__debug = debug
+        self.__start = None
+        self.__end = None
 
         if self.__debug:
             Utilities.print_debug_header('Modo debug')
 
     def prepare_collection(self):
         if self.__debug:
+            self.__start = time.perf_counter()
             Utilities.print_debug_header('Preparando la colección', True)
 
         self.__document_entries = self.__collection_handler.get_html_strings_and_urls_stream(self.__debug)
@@ -46,6 +50,11 @@ class System:
             Utilities.print_debug_header('Indexando la colección', True)
 
         self.__indexer.process_collection(self.__document_entries, self.__debug)
+
+        if self.__debug:
+            self.__end = time.perf_counter()
+            print(f"Tiempo de ejecución -> {self.__end - self.__start:0.4f} s")
+
         messagebox.showinfo(message="main.exe: ejecución completada.", title="Información")
 
     def search_for_file_path(self, root):
