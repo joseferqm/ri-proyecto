@@ -29,6 +29,9 @@ class CollectionHandler:
         self.__index_file_name = index_file_name
         self.__postings_file_name = postings_file_name
 
+    def get_html_strings_and_urls_stream(self, debug):
+        document_entries = list()
+
         urls_file_path = '{}/{}'.format(self.__main_dir, self.__urls_file_name)
 
         if debug:
