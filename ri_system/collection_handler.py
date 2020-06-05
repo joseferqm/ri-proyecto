@@ -107,11 +107,6 @@ class CollectionHandler:
         file_str = '\n'.join(line for line in lines)
         Utilities.create_and_save_file(file_path, file_str)
 
-    def create_vocabulary_file(self, lines):
-        vocabulary_file_path = '{}/{}'.format(self.__main_dir, self.__vocabulary_file_name)
-        vocabulary_file_str = '\n'.join(line for line in lines)
-        Utilities.create_and_save_file(vocabulary_file_path, vocabulary_file_str)
-
     def create_tok_dir(self):
         if not os.path.isdir('{}/{}'.format(self.__main_dir, self.__tok_files_dir)):
             os.mkdir('{}/{}'.format(self.__main_dir, self.__tok_files_dir))
