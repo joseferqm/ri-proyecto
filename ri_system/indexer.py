@@ -1,12 +1,8 @@
 import numpy as np
 from pyuca import Collator
-import math
-import glob
-import errno
-import os
-
 
 from ri_system.analyzer import Analyzer
+from ri_system.ouput_files import CollectionOutputFiles, DocumentOutputFiles
 from ri_system.utilities import Utilities
 
 
@@ -16,8 +12,9 @@ class Indexer:
 
     def process_collection(self, document_entries, debug):
         self.__collection_handler.create_tok_dir()
-        self.__collection_handler.create_weights_dir()
+        self.__collection_handler.create_wtd_dir()
         vocabulary = dict()
+        documents = dict()
         collator = Collator()
 
         if debug:
@@ -27,6 +24,8 @@ class Indexer:
             terms_per_document_sum = 0
 
         for document_entry in document_entries:
+            document_alias = document_entry.get_alias()
+            documents[document_alias] = dict()
             document_html_str = document_entry.get_html_str()
             tok_file_lines = list()
             if debug:
@@ -57,6 +56,7 @@ class Indexer:
                     tok_line = '{:30} {:12} {:20}'.format(term, str(freq_ij), str(round(f_ij, 3)))
                     tok_file_lines.append(tok_line)
                     self.update_vocabulary_dict(vocabulary, term, freq_ij)
+                    documents[document_alias][term] = round(f_ij, 3)
             else:
                 tok_file_lines.append('\n')
 
@@ -73,46 +73,56 @@ class Indexer:
                     line = '{:35} {}'.format(document_entry.get_alias(), dash_elem)
                     dash_file_lines.append(line)
 
-            self.__collection_handler.create_tok_file(document_entry.get_alias(), tok_file_lines)
+            self.__collection_handler.create_file_for_document(document_entry.get_alias(), tok_file_lines,
+                                                               DocumentOutputFiles.TOK)
 
-        postings_file_lines = list()
         vocabulary_file_lines = list()
 
         # El archivo Vocabulario debe estar ordenado alfabéticamente
         for term in sorted(vocabulary.keys(), key=collator.sort_key):
             values_tuple = vocabulary[term]
-            doc_count = values_tuple[0]
-            idf = round(math.log10(len(document_entries) / doc_count), 3)
-            vocabulary_line = '{:30} {:12} {:20}'.format(term, str(doc_count), str(idf))
-            vocabulary_file_lines.append(vocabulary_line)
+            n_i = values_tuple[0]
+            idf = Utilities.get_inverse_term_frequency(len(document_entries), n_i)
+            vocabulary[term] = (vocabulary[term][0], vocabulary[term][1], idf, vocabulary[term][3])
+            line = '{:30} {:12} {:20}'.format(term, str(n_i), str(idf))
+            vocabulary_file_lines.append(line)
 
-        files = glob.glob(self.__collection_handler.get_tok_dir()+'/*')
-        for name in files:
-            try:
-                with open(name, encoding='utf-8') as f:
-                    temporal_tok_lines = f.readlines()
-                    weights_file_lines = list()
-                    for temporal_tok_line in temporal_tok_lines:
-                        wtd_term = temporal_tok_line.split("\\s").pop(0)[:30].replace(' ', '').replace('\n', '')
-                        if wtd_term == '':
-                            continue
-                        tok_f_ij = temporal_tok_line.split("\\s").pop(0)[44:].replace(' ', '').replace('\n', '')
-                        values_tuple = vocabulary[wtd_term]
-                        doc_count = values_tuple[0]
-                        idf = round(math.log10(len(document_entries) / doc_count), 3)
-                        weight = float(tok_f_ij) * idf
-                        weights_line = '{:30} {:20}'.format(wtd_term, str(round(weight, 3)))
-                        weights_file_lines.append(weights_line)
-                        posting_line = '{:30} {:30} {:20}'.format(wtd_term, os.path.basename(f.name.replace('.tok', '.html')), str(round(weight, 3)))
-                        postings_file_lines.append(posting_line)
-                    self.__collection_handler.create_weights_file(os.path.basename(f.name.replace('.tok', '')),
-                                                                  weights_file_lines)
-            except IOError as exc:
-                if exc.errno != errno.EISDIR:
-                    raise
+        self.__collection_handler.create_file_for_collection(vocabulary_file_lines, CollectionOutputFiles.VOCABULARY)
 
-        self.__collection_handler.create_postings_file(postings_file_lines)
-        self.__collection_handler.create_vocabulary_file(vocabulary_file_lines)
+        # Archivos Indice y Postings
+        postings_file_lines = list()
+        index_file_lines = list()
+        postings_file_vocabulary = dict()
+        for document_alias, document_terms in documents.items():
+            wtd_file_lines = list()
+            for term, f_ij in document_terms.items():
+                weight = Utilities.get_term_weight(f_ij, vocabulary[term][2])
+                line = '{:30} {:20}'.format(term, str(weight))
+                wtd_file_lines.append(line)
+                Indexer.update_postings_dict(postings_file_vocabulary, term, document_alias, weight)
+            self.__collection_handler.create_file_for_document(document_alias, wtd_file_lines, DocumentOutputFiles.WTD)
+
+        current_postings_line = 0
+        for term in sorted(postings_file_vocabulary.keys(), key=collator.sort_key):
+            documents_list = postings_file_vocabulary[term]
+            for values_tuple in documents_list:
+                document_alias = values_tuple[0]
+                term_weight = values_tuple[1]
+                if vocabulary[term][3] is None:
+                    vocabulary[term] = (vocabulary[term][0], vocabulary[term][1], vocabulary[term][2], current_postings_line)
+                line = '{:30} {:40} {:20}'.format(term, document_alias+'.html', str(term_weight))
+                postings_file_lines.append(line)
+                current_postings_line += 1
+
+        for term in sorted(vocabulary.keys(), key=collator.sort_key):
+            values_tuple = vocabulary[term]
+            postings_entries_count = values_tuple[0]
+            postings_initial_position = values_tuple[3]
+            line = '{:30} {:12} {:12}'.format(term, str(postings_initial_position), str(postings_entries_count))
+            index_file_lines.append(line)
+
+        self.__collection_handler.create_file_for_collection(index_file_lines, CollectionOutputFiles.INDEX)
+        self.__collection_handler.create_file_for_collection(postings_file_lines, CollectionOutputFiles.POSTINGS)
 
         if debug:
             Utilities.print_debug_header('Resultados de la indexación', True)
@@ -135,6 +145,12 @@ class Indexer:
     @staticmethod
     def update_vocabulary_dict(vocabulary, term, count):
         if term in vocabulary.keys():
-            vocabulary[term] = (vocabulary[term][0] + 1, vocabulary[term][1] + count)
+            vocabulary[term] = (vocabulary[term][0] + 1, vocabulary[term][1] + count, vocabulary[term][2], vocabulary[term][3])
         else:
-            vocabulary[term] = (1, count)
+            vocabulary[term] = (1, count, None, None)
+
+    @staticmethod
+    def update_postings_dict(vocabulary, term, document_alias, weight):
+        if term not in vocabulary.keys():
+            vocabulary[term] = list()
+        vocabulary[term].append((document_alias, weight))

@@ -1,18 +1,32 @@
 import os
 
 from ri_system.document_entry import DocumentEntry
+from ri_system.ouput_files import CollectionOutputFiles, DocumentOutputFiles
 from ri_system.utilities import Utilities
 
 
 class CollectionHandler:
-    def __init__(self, main_dir, urls_file_name, vocabulary_file_name, html_files_dir,
-                 tok_files_dir, weights_files_dir, postings_file_name):
+    def __init__(self):
+        self.__main_dir = None
+        self.__html_files_dir = None
+        self.__urls_file_name = None
+        self.__tok_files_dir = None
+        self.__wtd_files_dir = None
+        self.__vocabulary_file_name = None
+        self.__index_file_name = None
+        self.__postings_file_name = None
+
+    def set_inputs_names(self, main_dir, urls_file_name, html_files_dir):
         self.__main_dir = main_dir
-        self.__urls_file_name = urls_file_name
-        self.__vocabulary_file_name = vocabulary_file_name
         self.__html_files_dir = html_files_dir
+        self.__urls_file_name = urls_file_name
+
+    def set_outputs_names(self, tok_files_dir, wtd_files_dir, vocabulary_file_name, index_file_name,
+                          postings_file_name):
         self.__tok_files_dir = tok_files_dir
-        self.__weights_files_dir = weights_files_dir
+        self.__wtd_files_dir = wtd_files_dir
+        self.__vocabulary_file_name = vocabulary_file_name
+        self.__index_file_name = index_file_name
         self.__postings_file_name = postings_file_name
 
     def get_html_strings_and_urls_stream(self, debug):
@@ -69,36 +83,34 @@ class CollectionHandler:
 
         return html_str
 
-    def create_tok_file(self, document_entry_alias, lines):
-        tok_file_path = '{}/{}/{}.tok'.format(self.__main_dir, self.__tok_files_dir, document_entry_alias)
-        tok_file_str = '\n'.join(line for line in lines)
-        Utilities.create_and_save_file(tok_file_path, tok_file_str)
+    def create_file_for_document(self, document_entry_alias, lines, file_selector):
+        if file_selector == DocumentOutputFiles.TOK:
+            files_dir = self.__tok_files_dir
+            file_extension = 'tok'
+        elif file_selector == DocumentOutputFiles.WTD:
+            files_dir = self.__wtd_files_dir
+            file_extension = 'wtd'
 
-    def create_vocabulary_file(self, lines):
-        vocabulary_file_path = '{}/{}'.format(self.__main_dir, self.__vocabulary_file_name)
-        vocabulary_file_str = '\n'.join(line for line in lines)
-        Utilities.create_and_save_file(vocabulary_file_path, vocabulary_file_str)
+        file_path = '{}/{}/{}.{}'.format(self.__main_dir, files_dir, document_entry_alias, file_extension)
+        file_str = '\n'.join(line for line in lines)
+        Utilities.create_and_save_file(file_path, file_str)
+
+    def create_file_for_collection(self, lines, file_selector):
+        if file_selector == CollectionOutputFiles.VOCABULARY:
+            file_name = self.__vocabulary_file_name
+        elif file_selector == CollectionOutputFiles.POSTINGS:
+            file_name = self.__postings_file_name
+        elif file_selector == CollectionOutputFiles.INDEX:
+            file_name = self.__index_file_name
+
+        file_path = '{}/{}'.format(self.__main_dir, file_name)
+        file_str = '\n'.join(line for line in lines)
+        Utilities.create_and_save_file(file_path, file_str)
 
     def create_tok_dir(self):
         if not os.path.isdir('{}/{}'.format(self.__main_dir, self.__tok_files_dir)):
             os.mkdir('{}/{}'.format(self.__main_dir, self.__tok_files_dir))
 
-    def get_tok_dir(self):
-        return '{}/{}'.format(self.__main_dir, self.__tok_files_dir)
-
-    def create_weights_dir(self):
-        if not os.path.isdir('{}/{}'.format(self.__main_dir, self.__weights_files_dir)):
-            os.mkdir('{}/{}'.format(self.__main_dir, self.__weights_files_dir))
-
-    def create_weights_file(self, document_entry_alias, lines):
-        weights_file_path = '{}/{}/{}.wtd'.format(self.__main_dir, self.__weights_files_dir, document_entry_alias)
-        weights_file_str = '\n'.join(line for line in lines)
-        Utilities.create_and_save_file(weights_file_path, weights_file_str)
-
-    def get_weights_dir(self):
-        return '{}/{}'.format(self.__main_dir, self.__weights_files_dir)
-
-    def create_postings_file(self, lines):
-        postings_file_path = '{}/{}'.format(self.__main_dir, self.__postings_file_name)
-        postings_file_str = '\n'.join(line for line in lines)
-        Utilities.create_and_save_file(postings_file_path, postings_file_str)
+    def create_wtd_dir(self):
+        if not os.path.isdir('{}/{}'.format(self.__main_dir, self.__wtd_files_dir)):
+            os.mkdir('{}/{}'.format(self.__main_dir, self.__wtd_files_dir))

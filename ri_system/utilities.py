@@ -2,6 +2,7 @@ import io
 import re
 import string
 import unicodedata
+import math
 
 import regex
 from bs4 import BeautifulSoup
@@ -143,3 +144,13 @@ class Utilities:
             symbol * (length + 2)
         )
         print(header)
+
+    @staticmethod
+    def get_inverse_term_frequency(total_documents_count, matching_documents_count):
+        inverse_term_frequency = math.log10(total_documents_count / matching_documents_count)
+        return round(inverse_term_frequency, 3)
+
+    @staticmethod
+    def get_term_weight(normalized_term_frequency, inverse_term_frequency):
+        term_weight = normalized_term_frequency * inverse_term_frequency
+        return round(term_weight, 3)
