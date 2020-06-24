@@ -66,4 +66,5 @@ class System:
         return tempdir
 
     def test_cuarta_etapa(self):
+        self.__search_engine.set_collection_vocabulary()
         self.__search_engine.test_cuarta_etapa_search_engine()

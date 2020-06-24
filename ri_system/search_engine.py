@@ -9,6 +9,10 @@ from ri_system.utilities import Utilities
 class SearchEngine:
     def __init__(self, collection_handler):
         self.__collection_handler = collection_handler
+        self.__collection_vocabulary = None
+
+    def set_collection_vocabulary(self):
+        self.__collection_vocabulary = self.__collection_handler.get_vocabulary_entries()
 
     def test_cuarta_etapa_search_engine(self):
         print('TEST 4TA ETAPA')
@@ -18,14 +22,13 @@ class SearchEngine:
         # Consulta de prueba 1
         query_string = "árbol pollo arbollll polloooo"
         # Consulta de prueba 2
-        # query_string = "gato perro pollo arbollll polloooo"
+        # query_string = "gato pollo arbollll polloooo perro"
 
         query_terms = Analyzer.retrieve_html_str_terms(query_string)
         # Se buscan los términos de la consulta en el vocabulario
         # Filtered query terms debe estar ordenado alfabéticamente para utilizar
         # dicho orden como orden de las entradas de los vectores
-        collection_vocabulary = self.__collection_handler.get_vocabulary_entries()
-        filtered_query_terms = [term for term in query_terms if term in collection_vocabulary.keys()]
+        filtered_query_terms = [term for term in query_terms if term in self.__collection_vocabulary.keys()]
         query_terms_np_array = np.array(filtered_query_terms)
         terms, counts = np.unique(query_terms_np_array, return_counts=True)
         query_vocabulary = dict(zip(terms, counts))
@@ -33,7 +36,7 @@ class SearchEngine:
         collator = Collator()
         final_query_terms = sorted(query_vocabulary.keys(), key=collator.sort_key)
         # Se obtiene el vector de pesos de la consulta
-        query_weights_vector = SearchEngine.get_query_weights_vector(final_query_terms, max_l_freq_lq, query_vocabulary, collection_vocabulary)
+        query_weights_vector = self.get_query_weights_vector(final_query_terms, max_l_freq_lq, query_vocabulary)
         print(query_weights_vector)
 
         # Se recuperan las listas de posteo de cada palabra involucrada
@@ -59,13 +62,12 @@ class SearchEngine:
         # Los documentos se identifican por ID en la lista de document_entries,
         # y lo que se devuelve es el document entry de cada uno
 
-    @staticmethod
-    def get_query_weights_vector(terms, max_l_freq_lq, query_vocabulary, collection_vocabulary):
+    def get_query_weights_vector(self, terms, max_l_freq_lq, query_vocabulary):
         query_vector = np.zeros(len(terms))
         for term_index, term in enumerate(terms):
             freq_iq = query_vocabulary[term]
             f_iq = freq_iq / max_l_freq_lq
-            idf = collection_vocabulary[term]
+            idf = self.__collection_vocabulary[term]
             term_weight = Utilities.get_term_weight(f_iq, idf, True)
             query_vector[term_index] = term_weight
 
