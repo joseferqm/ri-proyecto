@@ -134,9 +134,9 @@ class CollectionHandler:
 
         return vocabulary
 
-    def get_documents_vectors_from_postings(self, terms):
-        documents_vectors = dict()
+    def get_postings_lists(self, terms):
         index_results = dict()
+        postings_lists = dict()
 
         index_file_path = '{}/{}'.format(self.__main_dir, self.__index_file_name)
         postings_file_path = '{}/{}'.format(self.__main_dir, self.__postings_file_name)
@@ -156,11 +156,11 @@ class CollectionHandler:
 
                     index_results[term] = (initial_position, entries_count)
 
-        # Se recuperan las listas de posteo de cada palabra involucrada
-        # Se construyen las listas de documentos con sus respectivos pesos
         with Utilities.get_file(postings_file_path) as postings_file:
             postings_file_lines = postings_file.read().splitlines()
-            for term_index, term in enumerate(terms):
+            for term in terms:
+                postings_lists[term] = list()
+
                 index_results_info_tuple = index_results[term]
                 current_position = index_results_info_tuple[0]
                 entries_count = index_results_info_tuple[1]
@@ -174,12 +174,29 @@ class CollectionHandler:
                     document_alias = current_line[31:71].replace(' ', '')
                     term_weight = float(current_line[-20:].replace(' ', ''))
 
-                    if document_alias not in documents_vectors.keys():
-                        documents_vectors[document_alias] = np.zeros(len(terms))
-
-                    documents_vectors[document_alias][term_index] = term_weight
+                    postings_lists[term].append((document_alias, term_weight))
 
                     current_position += 1
                     entries_count -= 1
+
+        return postings_lists
+
+    def get_documents_weights_full_vectors(self, documents):
+        documents_vectors = list()
+
+        for document_alias in documents:
+            wtd_file_name = document_alias.replace('html', 'wtd')
+            wtd_file_path = '{}/{}/{}'.format(self.__main_dir, self.__wtd_files_dir, wtd_file_name)
+            with Utilities.get_file(wtd_file_path) as wtd_file:
+                document_vector = list()
+                for line in wtd_file:
+                    # Formato de salida de .wtd
+                    #   Primeros 30 caracteres -> término
+                    #   Últimos 20 caracteres -> peso del término
+                    term_weight = float(line[-20:].replace(' ', ''))
+                    document_vector.append(term_weight)
+
+                document_vector_np_array = np.array(document_vector)
+                documents_vectors.append(document_vector_np_array)
 
         return documents_vectors
