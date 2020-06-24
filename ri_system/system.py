@@ -5,6 +5,7 @@ import time
 
 from ri_system.collection_handler import CollectionHandler
 from ri_system.indexer import Indexer
+from ri_system.search_engine import SearchEngine
 from ri_system.utilities import Utilities
 
 
@@ -23,12 +24,12 @@ class System:
         tok_files_dir = 'Coleccion_tok'
         wtd_files_dir = 'Coleccion_wtd'
 
-        self.__collection_handler = CollectionHandler()
+        self.__collection_handler: CollectionHandler = CollectionHandler()
         self.__collection_handler.set_inputs_names(main_dir, urls_file_name, html_files_dir)
         self.__collection_handler.set_outputs_names(tok_files_dir, wtd_files_dir, vocabulary_file_name, index_file_name,
                                                     postings_file_name)
         self.__indexer: Indexer = Indexer(self.__collection_handler)
-
+        self.__search_engine: SearchEngine = SearchEngine(self.__collection_handler)
         self.__document_entries = None
 
         self.__debug = debug
@@ -63,3 +64,6 @@ class System:
         if len(tempdir) > 0:
             print("You chose: %s" % tempdir)
         return tempdir
+
+    def test_cuarta_etapa(self):
+        self.__search_engine.test_cuarta_etapa_search_engine()

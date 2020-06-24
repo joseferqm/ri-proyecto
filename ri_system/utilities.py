@@ -151,6 +151,9 @@ class Utilities:
         return round(inverse_term_frequency, 3)
 
     @staticmethod
-    def get_term_weight(normalized_term_frequency, inverse_term_frequency):
-        term_weight = normalized_term_frequency * inverse_term_frequency
+    def get_term_weight(normalized_term_frequency, inverse_term_frequency, is_query=False):
+        if is_query:
+            term_weight = (0.5 + 0.5 * normalized_term_frequency) * inverse_term_frequency
+        else:
+            term_weight = normalized_term_frequency * inverse_term_frequency
         return round(term_weight, 3)

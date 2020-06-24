@@ -1,4 +1,5 @@
 import os
+import numpy as np
 
 from ri_system.document_entry import DocumentEntry
 from ri_system.ouput_files import CollectionOutputFiles, DocumentOutputFiles
@@ -114,3 +115,71 @@ class CollectionHandler:
     def create_wtd_dir(self):
         if not os.path.isdir('{}/{}'.format(self.__main_dir, self.__wtd_files_dir)):
             os.mkdir('{}/{}'.format(self.__main_dir, self.__wtd_files_dir))
+
+    def get_vocabulary_entries(self):
+        vocabulary = dict()
+
+        vocabulary_file_path = '{}/{}'.format(self.__main_dir, self.__vocabulary_file_name)
+
+        with Utilities.get_file(vocabulary_file_path) as vocabulary_file:
+            for line in vocabulary_file:
+                # Formato de salida de Vocabulario.txt
+                #   Primeros 30 caracteres -> término
+                #   Últimos 20 caracteres -> idf del término
+                line = line.replace('\n', '')
+                term = line[:30].replace(' ', '')
+                term_idf = float(line[-20:].replace(' ', ''))
+
+                vocabulary[term] = term_idf
+
+        return vocabulary
+
+    def get_documents_vectors_from_postings(self, terms):
+        documents_vectors = dict()
+        index_results = dict()
+
+        index_file_path = '{}/{}'.format(self.__main_dir, self.__index_file_name)
+        postings_file_path = '{}/{}'.format(self.__main_dir, self.__postings_file_name)
+
+        with Utilities.get_file(index_file_path) as index_file:
+            for line in index_file:
+                # Formato de salida de Indice.txt
+                #   Primeros 30 caracteres -> término
+                #   Siguientes 12 caracteres -> posición inicial en archivo postings
+                #   Últimos 12 caracteres -> cantidad de entradas en archivo postings
+                line = line.replace('\n', '')
+                term = line[:30].replace(' ', '')
+
+                if term in terms:
+                    initial_position = int(line[31:43].replace(' ', ''))
+                    entries_count = int(line[-12:].replace(' ', ''))
+
+                    index_results[term] = (initial_position, entries_count)
+
+        # Se recuperan las listas de posteo de cada palabra involucrada
+        # Se construyen las listas de documentos con sus respectivos pesos
+        with Utilities.get_file(postings_file_path) as postings_file:
+            postings_file_lines = postings_file.read().splitlines()
+            for term_index, term in enumerate(terms):
+                index_results_info_tuple = index_results[term]
+                current_position = index_results_info_tuple[0]
+                entries_count = index_results_info_tuple[1]
+
+                while entries_count > 0:
+                    # Formato de salida de Postings.txt
+                    #   Primeros 30 caracteres -> término
+                    #   Siguientes 40 caracteres -> alias del documento
+                    #   Últimos 20 caracteres -> peso del término en el documento
+                    current_line = postings_file_lines[current_position]
+                    document_alias = current_line[31:71].replace(' ', '')
+                    term_weight = float(current_line[-20:].replace(' ', ''))
+
+                    if document_alias not in documents_vectors.keys():
+                        documents_vectors[document_alias] = np.zeros(len(terms))
+
+                    documents_vectors[document_alias][term_index] = term_weight
+
+                    current_position += 1
+                    entries_count -= 1
+
+        return documents_vectors
