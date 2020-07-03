@@ -36,44 +36,41 @@ class SearchEngine:
         query_terms_np_array = np.array(filtered_query_terms)
         terms, counts = np.unique(query_terms_np_array, return_counts=True)
         query_vocabulary = dict(zip(terms, counts))
-        print(query_vocabulary)
-        print(counts)
+        # print(query_vocabulary)
+        # print(counts)
         max_l_freq_lq = max(counts)
         collator = Collator()
         final_query_terms = sorted(query_vocabulary.keys(), key=collator.sort_key)
         # Se obtiene el vector de pesos de la consulta
         query_weights_vector = self.get_query_weights_vector(final_query_terms, max_l_freq_lq, query_vocabulary)
-        print(query_weights_vector)
+        # print(query_weights_vector)
 
         # Se recuperan las listas de posteo de cada palabra involucrada
         postings_lists = self.__collection_handler.get_postings_lists(final_query_terms)
-        print(postings_lists)
+        # print(postings_lists)
         # Se obtienen los vectores de pesos para los documentos de las listas de posteo
         documents_weights_vectors = SearchEngine.get_documents_weights_short_vectors(postings_lists, final_query_terms)
-        print(documents_weights_vectors)
+        # print(documents_weights_vectors)
 
         # Se calcula la similaridad del peso de cada documento de la lista de posteo con el peso de la consulta
         sorted_documents_aliases = sorted(documents_weights_vectors.keys(), key=collator.sort_key)
         query_documents_dot_products = SearchEngine.get_query_documents_dot_products(query_weights_vector, documents_weights_vectors, sorted_documents_aliases)
-        print(query_documents_dot_products)
+        # print(query_documents_dot_products)
         query_documents_norms_products = self.get_query_documents_norms_products(query_weights_vector, sorted_documents_aliases)
-        print(query_documents_norms_products)
+        # print(query_documents_norms_products)
         similarities = query_documents_dot_products / query_documents_norms_products
-        print(similarities)
+        # print(similarities)
 
-        # for document_index, document_alias in enumerate(sorted_documents_aliases):
-        #     print('{} -> {}'.format(document_alias, similarities[document_index]))
 
         # Se hace el ranking respectivo para ordenar los documentos
         # Los documentos se identifican por ID en la lista de document_entries,
         # y lo que se devuelve es el document entry de cada uno
-        # print()
         ascending_ranked_similarities = np.argsort(similarities)
         descending_ranked_similarities = ascending_ranked_similarities[::-1]
         for index in descending_ranked_similarities:
             document_complete_alias = sorted_documents_aliases[index]
             similarity = similarities[index]
-            print('{} -> {}'.format(document_complete_alias, similarity))
+            # print('{} -> {}'.format(document_complete_alias, similarity))
             ranked_documents.append(document_complete_alias)
 
         return ranked_documents

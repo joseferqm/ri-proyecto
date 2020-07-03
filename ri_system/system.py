@@ -76,22 +76,15 @@ class System:
         self.__search_engine.set_collection_vocabulary()
         ranked_documents = self.__search_engine.get_ranked_documents(query_string)
         query_results = dict()
-        # print(os.getcwd())
-        current_directory = os.getcwd()
         for index, document_complete_alias in enumerate(ranked_documents):
             document_alias = document_complete_alias.replace('.html', '')
-            # print('{} -> {}'.format(document_alias, self.__document_entries[document_alias].get_url()))
-            # query_results.append(self.__document_entries[document_alias])
             query_results[index] = dict([
-                ('alias', self.__document_entries[document_alias].get_alias()),
+                ('alias', document_complete_alias),
                 ('url', self.__document_entries[document_alias].get_url()),
-                ('local', '{}/RI_Coleccion/Coleccion/{}'.format(current_directory, document_complete_alias))
+                ('local', '/RI_Coleccion/Coleccion/{}'.format(document_complete_alias))
             ])
-            # print(query_results[index])
 
         end = time.perf_counter()
         query_time = f"{end - start:0.4f}"
-        print("Tiempo de ejecución -> {} s".format(query_time))
         query_results['query_time'] = query_time
-        print(query_results)
         return json.dumps(query_results)
