@@ -24,7 +24,7 @@ $(document).ready(() => {
     });
 
     $("#query-button").click(function () {
-        executeQuery(table);
+        executeQuery();
     });
 
     function executeQuery() {

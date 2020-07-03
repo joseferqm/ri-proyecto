@@ -26,7 +26,7 @@ def hello_world():
 
 
 @app.route('/executeQuery', methods=['GET'])
-def data_cluster():
+def execute_query():
     query_string = request.args.get('query_string', '')
     # print('Query string -> {}'.format(query_string))
     document_entries = ri_system.execute_query(query_string)
@@ -34,7 +34,7 @@ def data_cluster():
 
 
 @app.route('/RI_Coleccion/Coleccion/<path:filename>')
-def send_js(filename):
+def send_html(filename):
     return send_from_directory(app.config['LOCAL_FILES_CONFIG'], filename)
 
 
