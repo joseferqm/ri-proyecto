@@ -30,8 +30,8 @@ class CollectionHandler:
         self.__index_file_name = index_file_name
         self.__postings_file_name = postings_file_name
 
-    def get_html_strings_and_urls_stream(self, debug):
-        document_entries = list()
+    def get_html_strings_and_urls_stream(self, debug, search_engine_mode):
+        document_entries = dict()
 
         urls_file_path = '{}/{}'.format(self.__main_dir, self.__urls_file_name)
 
@@ -58,12 +58,12 @@ class CollectionHandler:
                 if debug:
                     print('Leyendo {}...'.format(html_file_name))
 
-                html_str = self.get_html_string(html_file_name)
+                html_str = None if search_engine_mode else self.get_html_string(html_file_name)
                 # TODO manejar urls
                 url = line_elems[1]
 
                 document_entry = DocumentEntry(alias, html_str, url)
-                document_entries.append(document_entry)
+                document_entries[alias] = document_entry
 
         # No es necesario llamar close sobre los archivos porque el contexto en el que está definido cada archivo
         # se encarga de cerrarlo

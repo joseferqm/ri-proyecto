@@ -14,13 +14,13 @@ class SearchEngine:
     def set_collection_vocabulary(self):
         self.__collection_vocabulary = self.__collection_handler.get_vocabulary_entries()
 
-    def test_cuarta_etapa_search_engine(self):
-        print('TEST 4TA ETAPA')
+    def get_ranked_documents(self, query_string):
+        ranked_documents = list()
         # Cuando el sistema inicia con la colección procesada y llega una consulta
         # Se procesa la consulta utilizando la función del indexador
 
         # Consulta de prueba 1
-        query_string = "árbol pollo arbollll polloooo"
+        # query_string = "árbol pollo arbollll polloooo"
         # Consulta de prueba 2
         # query_string = "gato pollo arbollll polloooo perro"
 
@@ -29,9 +29,15 @@ class SearchEngine:
         # Filtered query terms debe estar ordenado alfabéticamente para utilizar
         # dicho orden como orden de las entradas de los vectores
         filtered_query_terms = [term for term in query_terms if term in self.__collection_vocabulary.keys()]
+
+        if len(filtered_query_terms) == 0:
+            return ranked_documents
+
         query_terms_np_array = np.array(filtered_query_terms)
         terms, counts = np.unique(query_terms_np_array, return_counts=True)
         query_vocabulary = dict(zip(terms, counts))
+        print(query_vocabulary)
+        print(counts)
         max_l_freq_lq = max(counts)
         collator = Collator()
         final_query_terms = sorted(query_vocabulary.keys(), key=collator.sort_key)
@@ -55,12 +61,22 @@ class SearchEngine:
         similarities = query_documents_dot_products / query_documents_norms_products
         print(similarities)
 
-        for document_index, document_alias in enumerate(sorted_documents_aliases):
-            print('{} -> {}'.format(document_alias, similarities[document_index]))
+        # for document_index, document_alias in enumerate(sorted_documents_aliases):
+        #     print('{} -> {}'.format(document_alias, similarities[document_index]))
 
         # Se hace el ranking respectivo para ordenar los documentos
         # Los documentos se identifican por ID en la lista de document_entries,
         # y lo que se devuelve es el document entry de cada uno
+        # print()
+        ascending_ranked_similarities = np.argsort(similarities)
+        descending_ranked_similarities = ascending_ranked_similarities[::-1]
+        for index in descending_ranked_similarities:
+            document_complete_alias = sorted_documents_aliases[index]
+            similarity = similarities[index]
+            print('{} -> {}'.format(document_complete_alias, similarity))
+            ranked_documents.append(document_complete_alias)
+
+        return ranked_documents
 
     def get_query_weights_vector(self, terms, max_l_freq_lq, query_vocabulary):
         query_vector = np.zeros(len(terms))
