@@ -2,29 +2,32 @@ import numpy as np
 from numpy import linalg as LA
 from pyuca import Collator
 
+from ri_system.collection_handler import CollectionHandler
 from ri_system.analyzer import Analyzer
 from ri_system.utilities import Utilities
 
 
 class SearchEngine:
     def __init__(self, collection_handler):
-        self.__collection_handler = collection_handler
-        self.__collection_vocabulary = None
+        self.__collection_handler: CollectionHandler = collection_handler
+        self.__collection_vocabulary: dict = None
 
     def set_collection_vocabulary(self):
         self.__collection_vocabulary = self.__collection_handler.get_vocabulary_entries()
 
     def get_ranked_documents(self, query_string):
         ranked_documents = list()
-        # Cuando el sistema inicia con la colección procesada y llega una consulta
-        # Se procesa la consulta utilizando la función del indexador
 
+        # Cuando el sistema inicia con la colección procesada y llega una consulta
+        # Se procesa la consulta utilizando la función del analizador
         query_terms = Analyzer.retrieve_html_str_terms(query_string)
+
         # Se buscan los términos de la consulta en el vocabulario
-        # Filtered query terms debe estar ordenado alfabéticamente para utilizar
-        # dicho orden como orden de las entradas de los vectores
+        # Filtered query terms debe estar ordenado alfabéticamente para luego
+        # utilizar dicho ordenamiento en las entradas de los vectores
         filtered_query_terms = [term for term in query_terms if term in self.__collection_vocabulary.keys()]
 
+        # Caso en el que ninguno de los términos de la consulta existe en el vocabulario de la colección
         if len(filtered_query_terms) == 0:
             return ranked_documents
 
@@ -34,11 +37,13 @@ class SearchEngine:
         max_l_freq_lq = max(counts)
         collator = Collator()
         final_query_terms = sorted(query_vocabulary.keys(), key=collator.sort_key)
+
         # Se obtiene el vector de pesos de la consulta
         query_weights_vector = self.get_query_weights_vector(final_query_terms, max_l_freq_lq, query_vocabulary)
 
         # Se recuperan las listas de posteo de cada palabra involucrada
         postings_lists = self.__collection_handler.get_postings_lists(final_query_terms)
+
         # Se obtienen los vectores de pesos para los documentos de las listas de posteo
         documents_weights_vectors = SearchEngine.get_documents_weights_short_vectors(postings_lists, final_query_terms)
 

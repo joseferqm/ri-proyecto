@@ -53,13 +53,14 @@ class CollectionHandler:
                 # al nombre del archivo en la colección
                 line_elems = line.split(' ')
                 html_file_name = line_elems[0]
+                # En el diccionario document_entries los keys de las entradas
+                # son los alias de los documentos sin la extensión .html
                 alias = html_file_name.replace('.html', '')
 
                 if debug:
                     print('Leyendo {}...'.format(html_file_name))
 
                 html_str = None if search_engine_mode else self.get_html_string(html_file_name)
-                # TODO manejar urls
                 url = line_elems[1]
 
                 document_entry = DocumentEntry(alias, html_str, url)

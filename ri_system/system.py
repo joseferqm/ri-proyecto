@@ -10,14 +10,23 @@ from ri_system.search_engine import SearchEngine
 from ri_system.utilities import Utilities
 
 
+def search_for_file_path(root):
+    currdir = os.getcwd()
+    tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, title='Por favor seleccione un directorio')
+    if len(tempdir) > 0:
+        print("You chose: %s" % tempdir)
+    return tempdir
+
+
 class System:
     def __init__(self, debug, search_engine):
+        # Si el sistema opera en modo de motor de búsqueda, el directorio principal es RI_Coleccion
         if search_engine:
             main_dir = "RI_Coleccion"
         else:
             root = tkinter.Tk()
             root.withdraw()
-            main_dir = self.search_for_file_path(root)
+            main_dir = search_for_file_path(root)
 
         urls_file_name = 'URLS.txt'
         vocabulary_file_name = 'Vocabulario.txt'
@@ -64,19 +73,15 @@ class System:
         if not self.__search_engine_mode:
             messagebox.showinfo(message="main.exe: ejecución completada.", title="Información")
 
-    def search_for_file_path(self, root):
-        currdir = os.getcwd()
-        tempdir = filedialog.askdirectory(parent=root, initialdir=currdir, title='Por favor seleccione un directorio')
-        if len(tempdir) > 0:
-            print("You chose: %s" % tempdir)
-        return tempdir
-
     def execute_query(self, query_string):
         start = time.perf_counter()
         self.__search_engine.set_collection_vocabulary()
+        # El motor de búsqueda es el encargado de recuperar los documentos en orden de rankeo
         ranked_documents = self.__search_engine.get_ranked_documents(query_string)
         query_results = dict()
         for index, document_complete_alias in enumerate(ranked_documents):
+            # En el diccionario document_entries los keys de las entradas
+            # son los alias de los documentos sin la extensión .html
             document_alias = document_complete_alias.replace('.html', '')
             query_results[index] = dict([
                 ('alias', document_complete_alias),

@@ -1,0 +1,117 @@
+@startuml
+System o-- CollectionHandler
+System o-- Indexer
+System o-- DocumentEntry
+System o-- SearchEngine
+Indexer o-- CollectionHandler
+SearchEngine o-- CollectionHandler
+Utilities <.. CollectionHandler
+Utilities <.. Indexer
+Utilities <.. Analyzer
+Analyzer <.. Indexer
+
+class System {
+    CollectionHandler collection_handler
+    Indexer indexer
+    SearchEngine search_engine
+    Dictionary<string, DocumentEntry> document_entries
+
+    prepare_collection()
+    index_collection()
+    execute_query(query_string)
+}
+
+class SearchEngine {
+    CollectionHandler collection_handler
+    Dictionary<DocumentEntry> collection_vocabulary
+
+    set_collection_vocabulary()
+    get_ranked_documents(query_string): string[]
+    get_query_weights_vector(terms, max_l_freq_lq, query_vocabulary): numpy.ndarray
+    get_query_documents_norms_products(query_weights_vector, sorted_documents_aliases): numpy.ndarray
+
+    {static}get_documents_weights_short_vectors(postings_result, terms): Dictionary<string, float>
+    {static}get_query_documents_dot_products(query_weights_vector, documents_weights_vectors, sorted_documents_aliases): numpy.ndarray
+}
+
+class Indexer {
+    CollectionHandler collection_handler
+
+    process_collection(document_entries)
+
+    {static}update_vocabulary_dict(vocabulary, term, count)
+    {static}update_postings_dict(vocabulary, term, document_alias, weight)
+}
+
+class Analyzer {
+    {static}retrieve_html_str_terms(html_str): string[]
+    {static}apply_general_rules(html_str): string[]
+}
+
+class CollectionHandler {
+    string main_dir
+    string urls_file_name
+    string html_files_dir
+    string tok_files_dir
+    string wtd_files_dir
+    string vocabulary_file_name
+    string index_file_name
+    string postings_file_name
+
+    set_inputs_names(main_dir, urls_file_name, html_files_dir)
+    set_outputs_names(tok_files_dir, wtd_files_dir, vocabulary_file_name, index_file_name, postings_file_name)
+    get_html_strings_and_urls_stream(): Dictionary<string, DocumentEntry>
+    get_html_string(html_reference, reference_is_html_file_name): string
+
+    create_file_for_document(document_entry_alias, lines, file_selector)
+    create_file_for_collection(lines, file_selector)
+    create_tok_dir()
+    create_wtd_dir()
+    get_vocabulary_entries(): Dictionary<string, float>
+    get_postings_lists(terms): Dictionary<string, tuple>
+    get_documents_weights_full_vectors(documents): numpy.ndarray[]
+}
+
+class DocumentEntry {
+        string alias
+        string html_str
+        string url
+
+        get_alias(): string
+        get_html_str(): string
+        get_url(): string
+}
+
+class Utilities {
+    _regex.Pattern regex_all_other_chars
+    _regex.Pattern regex_format_chars
+    _regex.Pattern regex_punctuation_chars
+    _regex.Pattern regex_dash_chars
+    _regex.Pattern regex_digit_chars
+    re.Pattern regex_allowed_chars
+    re.Pattern regex_digits_or_letter_group
+    string[] dash_exceptions
+    int max_term_length
+    int min_number
+    int max_number
+
+    {static} get_file(file_path): _io.TextIOWrapper
+    {static} create_and_save_file(file_path, text)
+    {static} read_html_file(file, file_path): string
+    {static} replace_unicode_all_other_chars(original_str): string
+    {static} remove_unicode_format_chars(original_str): string
+    {static} replace_punctuation_chars(original_str): string
+    {static} handle_group_chars(group, original_str, replacement_char): string
+    {static}normalize_dash_chars(original_str): string
+    {static}handle_dash_chars(original_str): string
+    {static}is_dashed_word_exception(term): bool
+    {static}in_range(number): bool
+    {static}has_only_digits(term): bool
+    {static}has_only_allowed_chars(term): bool
+    {static}get_digits_or_letters_groups(term): string[]
+    {static}normalize_special_chars(original_str): string
+    {static}get_text_from_html_str(html_str): string
+    {static}get_inverse_term_frequency(total_documents_count, matching_documents_count): number
+    {static}get_term_weight(normalized_term_frequency, inverse_term_frequency): number
+}
+@enduml
