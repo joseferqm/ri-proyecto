@@ -8,7 +8,7 @@ from flask import request
 from flask import send_from_directory
 from flask_cors import CORS
 
-from sri.ri_system.system import System
+from ri_system.system import System
 
 app = Flask(__name__)
 cors = CORS(app)

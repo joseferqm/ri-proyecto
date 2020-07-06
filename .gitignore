@@ -1,7 +1,7 @@
 # Collection
 RI_Coleccion
 RI_Coleccion_TEST
-frontend/node_modules
+node_modules
 
 # Test files
 original.html
